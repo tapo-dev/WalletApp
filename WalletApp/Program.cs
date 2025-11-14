@@ -1,10 +1,19 @@
+using Microsoft.EntityFrameworkCore;
 using WalletApp.Components;
+using WalletApp.Data;
+using WalletApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=expenses.db"));
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 var app = builder.Build();
 

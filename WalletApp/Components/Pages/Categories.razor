@@ -1,0 +1,55 @@
+@page "/categories"
+@using WalletApp.Services
+@using WalletApp.Models
+@rendermode InteractiveServer
+
+<h3>Categories</h3>
+<input type="text" @bind="_newCategory"/>
+<button @onclick="SubmitNewCategory">Add</button>
+<body>@_errorMessage</body>
+
+@if (_categoriesList.Any()) {
+    @foreach(var category in _categoriesList)
+    {
+        // Prints out all the categories
+        <li>
+            @category.Name
+        </li>
+    }
+}
+else {
+    <body>No categories found</body>
+}
+
+
+@code {
+    // Dependency injection
+    [Inject] public ICategoryService CategoryService { get; set; } = default!;
+
+    private List<Category> _categoriesList = new List<Category>();
+
+    private string _newCategory = string.Empty;
+    private string _errorMessage = string.Empty;
+    private const string DefaultColor = "8A8A8A";
+
+    protected override async Task OnInitializedAsync() {
+        _categoriesList = await CategoryService.GetCategoriesAsync();
+    }
+    
+    private async Task SubmitNewCategory() {
+        if (_newCategory.Any()) {
+            var newCategory = new Category() { Name = _newCategory, Color = DefaultColor };
+            await CategoryService.AddCategoryAsync(newCategory);
+            _newCategory = string.Empty;
+
+            _errorMessage = string.Empty;
+            
+            // Reload list
+            _categoriesList = await CategoryService.GetCategoriesAsync();
+        }
+        else {
+            // Tell the user that the input field is empty
+            _errorMessage = "The input field is empty";
+        }
+    }
+}

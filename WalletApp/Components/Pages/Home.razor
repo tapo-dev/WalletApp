@@ -1,7 +1,130 @@
 ﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using WalletApp.Data
+@using WalletApp.Models
+@inject AppDbContext Db
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Test page</h1>
 
-Welcome to your new app.
+<h3>Add new user</h3>
+<input @bind="newUserName" placeholder="Enter name..." />
+<button @onclick=AddUser>Add</button>
+<button class="btn btn-danger" @onclick="ClearUsers">Delete all users</button>
+
+<h3>All users:</h3>
+<ul>
+    @if (users.Count == 0)
+    {
+        <li><em>No users found yet</em></li>
+    }
+    else
+    {
+        @foreach (var user in users)
+        {
+            <li>@user.Name</li>
+        }
+    }
+</ul>
+
+<h3>Add new expense</h3>
+
+<input @bind="expenseName" placeholder="Expense name..." />
+<input @bind="expenseAmount" type="number" placeholder="Amount..." />
+<button @onclick="AddExpense">Add expense</button>
+
+<h3>All expenses:</h3>
+<ul>
+    @if (expenses.Count == 0)
+    {
+        <li><em>No expenses found yet</em></li>
+    }
+    else
+    {
+        @foreach (var expense in expenses)
+        {
+            <li>@expense.Name - @expense.Amount €</li>
+        }
+    }
+</ul>
+
+
+<ul>
+    @if (expenses.Count == 0)
+    {
+        <li><em>No users found yet</em></li>
+    }
+    else
+    {
+        @foreach (var user in users)
+        {
+            <li>@user.Name</li>
+        }
+    }
+</ul>
+
+@code {
+    private List<User> users = new();
+    private List<Expense> expenses = new();
+    private string newUserName = "";
+    private string expenseName = "";
+    private float expenseAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // načti uživatele z DB při startu
+        users = await Db.Users.ToListAsync();
+        expenses = await Db.Expenses.ToListAsync();
+    }
+
+    private async Task AddUser()
+    {
+        if (!string.IsNullOrWhiteSpace(newUserName))
+        {
+            var user = new User { Name = newUserName };
+            Db.Users.Add(user);
+            await Db.SaveChangesAsync();
+
+            // znovu načti seznam
+            users = await Db.Users.ToListAsync();
+
+            // vyčisti input
+            newUserName = "";
+
+            StateHasChanged(); // přerenderování UI
+        }
+    }
+    
+    private async Task ClearUsers()
+    {
+        Db.Users.RemoveRange(Db.Users);
+        await Db.SaveChangesAsync();
+
+        users.Clear();
+        StateHasChanged();
+    }
+
+    private async Task AddExpense() {
+        if (!string.IsNullOrWhiteSpace(expenseName) && expenseAmount > 0)
+        {
+            var expense = new Expense
+            {
+                Name = expenseName,
+                Amount = expenseAmount
+            };
+
+            Db.Expenses.Add(expense);
+            await Db.SaveChangesAsync();
+
+            expenses = await Db.Expenses.ToListAsync();
+
+            expenseName = "";
+            expenseAmount = 0;
+
+            StateHasChanged();
+        }
+    }
+
+}
