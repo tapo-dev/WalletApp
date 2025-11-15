@@ -7,7 +7,6 @@
 <h3>Categories</h3>
 <input type="text" @bind="_newCategory"/>
 <button @onclick="SubmitNewCategory">Add</button>
-<body>@_errorMessage</body>
 
 @if (_categoriesList.Any()) {
     @foreach(var category in _categoriesList)
@@ -17,7 +16,7 @@
     }
 }
 else {
-    <body>No categories found</body>
+    <p>@_errorMessage</p>
 }
 
 
@@ -29,7 +28,7 @@ else {
     private List<Category> _categoriesList = new List<Category>();
 
     private string _newCategory = string.Empty;
-    private string _errorMessage = string.Empty;
+    private string _errorMessage = "No categories found";
     private const string DefaultColor = "#8A8A8A";
 
     protected override async Task OnInitializedAsync() {
@@ -40,8 +39,9 @@ else {
         if (_newCategory.Any()) {
             var newCategory = new Category() { Name = _newCategory, Color = DefaultColor };
             await CategoryService.AddCategoryAsync(newCategory);
+            
+            // Empty the strings
             _newCategory = string.Empty;
-
             _errorMessage = string.Empty;
 
             // Reload list

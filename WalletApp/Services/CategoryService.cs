@@ -18,4 +18,9 @@ public class CategoryService : ICategoryService {
         await _context.Categories.AddAsync(newCategory);
         await _context.SaveChangesAsync();
     }
+
+    public async Task AddSubCategoryAsync(Subcategory subcategory) {
+        await _context.Subcategories.AddAsync(subcategory);
+        await _context.SaveChangesAsync();
+    }
 }
