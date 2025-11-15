@@ -18,5 +18,11 @@ public class AppDbContext : DbContext {
             new Category() { Id = 2, Name = "Housing", Color = "#2338C4"},
             new Category() { Id = 3, Name = "Fun", Color = "#23C423"}
         );
+
+        modelBuilder.Entity<Subcategory>().HasData(
+            new Subcategory() { Id = 1, CategoryId = 1, Name = "Restaurant"},
+            new Subcategory() { Id = 2, CategoryId = 1, Name = "Groceries"},
+            new Subcategory() { Id = 3, CategoryId = 2, Name = "Rent"}
+        );
     }
 }

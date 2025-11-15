@@ -1,6 +1,7 @@
 @page "/categories"
 @using WalletApp.Services
 @using WalletApp.Models
+@using WalletApp.Components.Shared
 @rendermode InteractiveServer
 
 <h3>Categories</h3>
@@ -12,9 +13,7 @@
     @foreach(var category in _categoriesList)
     {
         // Prints out all the categories
-        <li>
-            @category.Name
-        </li>
+        <CategoryRow CategoryData="@category"/>
     }
 }
 else {
@@ -23,6 +22,7 @@ else {
 
 
 @code {
+
     // Dependency injection
     [Inject] public ICategoryService CategoryService { get; set; } = default!;
 
@@ -30,12 +30,12 @@ else {
 
     private string _newCategory = string.Empty;
     private string _errorMessage = string.Empty;
-    private const string DefaultColor = "8A8A8A";
+    private const string DefaultColor = "#8A8A8A";
 
     protected override async Task OnInitializedAsync() {
         _categoriesList = await CategoryService.GetCategoriesAsync();
     }
-    
+
     private async Task SubmitNewCategory() {
         if (_newCategory.Any()) {
             var newCategory = new Category() { Name = _newCategory, Color = DefaultColor };
@@ -43,7 +43,7 @@ else {
             _newCategory = string.Empty;
 
             _errorMessage = string.Empty;
-            
+
             // Reload list
             _categoriesList = await CategoryService.GetCategoriesAsync();
         }

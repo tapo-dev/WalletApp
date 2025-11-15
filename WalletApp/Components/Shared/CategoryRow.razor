@@ -1,0 +1,33 @@
+@using WalletApp.Models
+
+<li @onclick="ToggleSubcategories" style="cursor: pointer;"> 
+    @CategoryData.Name
+</li>
+@if (_isExpanded) {
+    <ul>@foreach (var subcategory in CategoryData.Subcategories) {
+            <li>
+                @subcategory.Name
+            </li>
+        }
+    </ul>
+    
+    <input type="text" @bind="_newSubcategoryName"/>
+    <button @onclick="SubmitNewSubcategory">Add new subcategory</button>
+}
+
+@code {
+    [Parameter] public Category CategoryData { get; set; } = default!;
+
+    private bool _isExpanded = false;
+    private string _newSubcategoryName = string.Empty;
+
+    public void ToggleSubcategories() {
+        _isExpanded = !_isExpanded;
+    }
+
+    private async Task SubmitNewSubcategory() {
+        if (_newSubcategoryName.Any()) {
+            
+        }
+    }
+}
