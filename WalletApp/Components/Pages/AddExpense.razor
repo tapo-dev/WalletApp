@@ -4,11 +4,17 @@
 @rendermode InteractiveServer
 <h3>Add Expense</h3>
 
-<!-- TODO: Dodělat prvni zobrazit kategorie a pak subkategorie -->
+<p>Category</p>
+<select @bind="_category.Id" @bind:after="OnCategorySelectedAsync">
+    <option value="0">Choose category...</option>
+    @foreach (var category in _allCategories) {
+        <option value="@category.Id">@category.Name</option>
+    }
+</select>
 <p>Subcategory</p>
 <select @bind="_newExpense.SubcategoryId">
     <option value="0">Choose subcategory...</option>
-    @foreach (var sub in _allSubcategories) {
+    @foreach (var sub in _subcategories) {
         <option value="@sub.Id">@sub.Name</option>
     }
 </select>
@@ -22,15 +28,17 @@
     [Inject] public ICategoryService CategoryService { get; set; } = default!;
     [Inject] public IExpenseService ExpenseService { get; set; } = default!;
 
-    private List<Subcategory> _allSubcategories = new List<Subcategory>();
+    private List<Subcategory> _subcategories = new List<Subcategory>();
+    private List<Category> _allCategories = new List<Category>();
 
+    private Category _category = new Category();
     private Expense _newExpense = new Expense();
-    
+
     private string _errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync() {
         await base.OnInitializedAsync();
-        _allSubcategories = await CategoryService.GetAllSubcategoriesAsync();
+        _allCategories = await CategoryService.GetCategoriesAsync();
     }
 
     private async Task SubmitNewExpense() {
@@ -43,5 +51,9 @@
         else {
             _errorMessage = "Empty input field";
         }
+    }
+
+    private async Task OnCategorySelectedAsync() {
+        _subcategories = await CategoryService.GetSubcategoriesFromCategoryAsync(_category);
     }
 }

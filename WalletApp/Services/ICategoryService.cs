@@ -9,5 +9,5 @@ public interface ICategoryService {
     
     // Subcategories part
     public Task AddSubCategoryAsync(Subcategory subcategory);
-    public Task<List<Subcategory>> GetAllSubcategoriesAsync();
+    public Task<List<Subcategory>> GetSubcategoriesFromCategoryAsync(Category category);
 }
