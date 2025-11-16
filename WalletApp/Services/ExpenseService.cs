@@ -1,32 +1,20 @@
+using Microsoft.EntityFrameworkCore;
 using WalletApp.Data;
 using WalletApp.Models;
 
 namespace WalletApp.Services;
 
-public class ExpenseService {
+public class ExpenseService : IExpenseService {
     private readonly AppDbContext _context;
-
     public ExpenseService(AppDbContext context)
     {
         _context = context;
     }
-    public void CreateExpense(Expense expense) {
-        throw new NotImplementedException();
-    }
-    
-    public void EditExpense(Expense expense) {
-        throw new NotImplementedException();
-    }
-    
-    public void DeleteExpense(Expense expense) {
-        throw new NotImplementedException();
-    }
 
-    public void AdjustBalance(float amount) {
-        throw new NotImplementedException();
-    }
-
-    public void RecalculateBalance(User user) {
-        throw new NotImplementedException();
+    public async Task<List<Expense>> GetAllExpensesAsync() => 
+        await _context.Expenses.ToListAsync();
+    public async Task AddExpenseAsync(Expense expense) {
+        await _context.Expenses.AddAsync(expense);
+        await _context.SaveChangesAsync();
     }
 }

@@ -29,42 +29,6 @@
     }
 </ul>
 
-<h3>Add new expense</h3>
-
-<input @bind="expenseName" placeholder="Expense name..." />
-<input @bind="expenseAmount" type="number" placeholder="Amount..." />
-<button @onclick="AddExpense">Add expense</button>
-
-<h3>All expenses:</h3>
-<ul>
-    @if (expenses.Count == 0)
-    {
-        <li><em>No expenses found yet</em></li>
-    }
-    else
-    {
-        @foreach (var expense in expenses)
-        {
-            <li>@expense.Name - @expense.Amount €</li>
-        }
-    }
-</ul>
-
-
-<ul>
-    @if (expenses.Count == 0)
-    {
-        <li><em>No users found yet</em></li>
-    }
-    else
-    {
-        @foreach (var user in users)
-        {
-            <li>@user.Name</li>
-        }
-    }
-</ul>
-
 @code {
     private List<User> users = new();
     private List<Expense> expenses = new();
@@ -105,26 +69,4 @@
         users.Clear();
         StateHasChanged();
     }
-
-    private async Task AddExpense() {
-        if (!string.IsNullOrWhiteSpace(expenseName) && expenseAmount > 0)
-        {
-            var expense = new Expense
-            {
-                Name = expenseName,
-                Amount = expenseAmount
-            };
-
-            Db.Expenses.Add(expense);
-            await Db.SaveChangesAsync();
-
-            expenses = await Db.Expenses.ToListAsync();
-
-            expenseName = "";
-            expenseAmount = 0;
-
-            StateHasChanged();
-        }
-    }
-
 }

@@ -13,7 +13,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Register all the services
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 var app = builder.Build();
 
