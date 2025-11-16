@@ -11,8 +11,8 @@ using WalletApp.Data;
 namespace WalletApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251114203700_PridaniKategorii")]
-    partial class PridaniKategorii
+    [Migration("20251116171622_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,6 +37,26 @@ namespace WalletApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Color = "#DB3F21",
+                            Name = "Food"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Color = "#2338C4",
+                            Name = "Housing"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Color = "#23C423",
+                            Name = "Fun"
+                        });
                 });
 
             modelBuilder.Entity("WalletApp.Models.Expense", b =>
@@ -73,13 +93,38 @@ namespace WalletApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubCategories");
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Subcategories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryId = 1,
+                            Name = "Restaurant"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryId = 1,
+                            Name = "Groceries"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoryId = 2,
+                            Name = "Rent"
+                        });
                 });
 
             modelBuilder.Entity("WalletApp.Models.User", b =>
@@ -107,7 +152,7 @@ namespace WalletApp.Migrations
             modelBuilder.Entity("WalletApp.Models.Expense", b =>
                 {
                     b.HasOne("WalletApp.Models.Subcategory", "Subcategory")
-                        .WithMany()
+                        .WithMany("Expenses")
                         .HasForeignKey("SubcategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -117,6 +162,27 @@ namespace WalletApp.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("Subcategory");
+                });
+
+            modelBuilder.Entity("WalletApp.Models.Subcategory", b =>
+                {
+                    b.HasOne("WalletApp.Models.Category", "Category")
+                        .WithMany("Subcategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("WalletApp.Models.Category", b =>
+                {
+                    b.Navigation("Subcategories");
+                });
+
+            modelBuilder.Entity("WalletApp.Models.Subcategory", b =>
+                {
+                    b.Navigation("Expenses");
                 });
 
             modelBuilder.Entity("WalletApp.Models.User", b =>

@@ -33,7 +33,7 @@ namespace WalletApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
 
                     b.HasData(
                         new
@@ -81,7 +81,7 @@ namespace WalletApp.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Expenses", (string)null);
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("WalletApp.Models.Subcategory", b =>
@@ -101,7 +101,7 @@ namespace WalletApp.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("SubCategories", (string)null);
+                    b.ToTable("Subcategories");
 
                     b.HasData(
                         new
@@ -143,13 +143,13 @@ namespace WalletApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("WalletApp.Models.Expense", b =>
                 {
                     b.HasOne("WalletApp.Models.Subcategory", "Subcategory")
-                        .WithMany()
+                        .WithMany("Expenses")
                         .HasForeignKey("SubcategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -175,6 +175,11 @@ namespace WalletApp.Migrations
             modelBuilder.Entity("WalletApp.Models.Category", b =>
                 {
                     b.Navigation("Subcategories");
+                });
+
+            modelBuilder.Entity("WalletApp.Models.Subcategory", b =>
+                {
+                    b.Navigation("Expenses");
                 });
 
             modelBuilder.Entity("WalletApp.Models.User", b =>

@@ -8,5 +8,7 @@ public class Subcategory {
     public int CategoryId { get; set; }
     
     // 1:N relationship between Category and Subcategory
-    public Category Category { get; set; }
+    public Category Category { get; set; } = default!;
+
+    public List<Expense> Expenses { get; set; } = new List<Expense>();
 }

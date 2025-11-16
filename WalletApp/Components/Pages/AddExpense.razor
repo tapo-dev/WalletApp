@@ -1,0 +1,47 @@
+@page "/add-expense"
+@using WalletApp.Models
+@using WalletApp.Services
+@rendermode InteractiveServer
+<h3>Add Expense</h3>
+
+<!-- TODO: Dodělat prvni zobrazit kategorie a pak subkategorie -->
+<p>Subcategory</p>
+<select @bind="_newExpense.SubcategoryId">
+    <option value="0">Choose subcategory...</option>
+    @foreach (var sub in _allSubcategories) {
+        <option value="@sub.Id">@sub.Name</option>
+    }
+</select>
+<p>Name (optional)</p>
+<input type="text" @bind="_newExpense.Name"/>
+<p>Amount</p>
+<input type="number" @bind="_newExpense.Amount"/>
+<button @onclick="SubmitNewExpense">Add expense</button>
+
+@code {
+    [Inject] public ICategoryService CategoryService { get; set; } = default!;
+    [Inject] public IExpenseService ExpenseService { get; set; } = default!;
+
+    private List<Subcategory> _allSubcategories = new List<Subcategory>();
+
+    private Expense _newExpense = new Expense();
+    
+    private string _errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync() {
+        await base.OnInitializedAsync();
+        _allSubcategories = await CategoryService.GetAllSubcategoriesAsync();
+    }
+
+    private async Task SubmitNewExpense() {
+        if (_newExpense.SubcategoryId != 0 && !float.IsNaN(_newExpense.Amount)) {
+            await ExpenseService.AddExpenseAsync(_newExpense);
+
+            _newExpense = new Expense();
+            _errorMessage = string.Empty;
+        }
+        else {
+            _errorMessage = "Empty input field";
+        }
+    }
+}
