@@ -3,7 +3,7 @@
 @using WalletApp.Services
 @rendermode InteractiveServer
 <h3>Add Expense</h3>
-
+<!-- Form for adding an expense -->
 <p>Category</p>
 <select @bind="_category.Id" @bind:after="OnCategorySelectedAsync">
     <option value="0">Choose category...</option>
@@ -23,6 +23,7 @@
 <p>Amount</p>
 <input type="number" @bind="_newExpense.Amount"/>
 <button @onclick="SubmitNewExpense">Add expense</button>
+<p>@_errorMessage</p>
 
 @code {
     [Inject] public ICategoryService CategoryService { get; set; } = default!;
@@ -37,23 +38,44 @@
     private string _errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync() {
-        await base.OnInitializedAsync();
-        _allCategories = await CategoryService.GetCategoriesAsync();
+        try {
+            await base.OnInitializedAsync();
+            _allCategories = await CategoryService.GetCategoriesAsync();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error in initializing AddExpense page: {ex.Message}");
+        }
     }
 
     private async Task SubmitNewExpense() {
-        if (_newExpense.SubcategoryId != 0 && !float.IsNaN(_newExpense.Amount)) {
+        if (_newExpense.SubcategoryId == 0 || _newExpense.Amount <= 0) {
+            _errorMessage = "Empty input field";
+            return;
+        }
+
+        try {
+            _errorMessage = string.Empty;
+
+            // Adds new expense
             await ExpenseService.AddExpenseAsync(_newExpense);
 
+            // Submitted succesfully -> clean
             _newExpense = new Expense();
-            _errorMessage = string.Empty;
         }
-        else {
-            _errorMessage = "Empty input field";
+        catch (Exception ex) {
+            _errorMessage = "An error has occured during creating your expense";
+            Console.WriteLine($"Error in saving expense: {ex.Message}");
         }
     }
 
     private async Task OnCategorySelectedAsync() {
-        _subcategories = await CategoryService.GetSubcategoriesFromCategoryAsync(_category);
+        try {
+            _newExpense.SubcategoryId = 0;
+            _subcategories = await CategoryService.GetSubcategoriesFromCategoryAsync(_category.Id);
+        }
+        catch (Exception ex) {
+            _errorMessage = "An error has occured during selecting your category";
+            Console.WriteLine($"Error in selecting category: {ex.Message}");
+        }
     }
 }

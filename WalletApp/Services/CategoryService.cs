@@ -24,6 +24,6 @@ public class CategoryService : ICategoryService {
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Subcategory>> GetSubcategoriesFromCategoryAsync(Category category) =>
-        await _context.Subcategories.Where(subcategory => subcategory.Category == category).ToListAsync();
+    public async Task<List<Subcategory>> GetSubcategoriesFromCategoryAsync(int categoryId) =>
+        await _context.Subcategories.Where(subcategory => subcategory.Category.Id == categoryId).ToListAsync();
 }

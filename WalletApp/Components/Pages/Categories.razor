@@ -7,6 +7,7 @@
 <h3>Categories</h3>
 <input type="text" @bind="_newCategory"/>
 <button @onclick="SubmitNewCategory">Add</button>
+<p>@_errorMessage</p>
 
 @if (_categoriesList.Any()) {
     @foreach(var category in _categoriesList)
@@ -14,9 +15,6 @@
         // Prints out all the categories
         <CategoryRow CategoryData="@category"/>
     }
-}
-else {
-    <p>@_errorMessage</p>
 }
 
 
@@ -32,24 +30,34 @@ else {
     private const string DefaultColor = "#8A8A8A";
 
     protected override async Task OnInitializedAsync() {
-        _categoriesList = await CategoryService.GetCategoriesAsync();
+        try {
+            _categoriesList = await CategoryService.GetCategoriesAsync();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error in initializing Categories page: {ex.Message}");
+        }
     }
 
     private async Task SubmitNewCategory() {
-        if (_newCategory.Any()) {
-            var newCategory = new Category() { Name = _newCategory, Color = DefaultColor };
-            await CategoryService.AddCategoryAsync(newCategory);
-            
-            // Empty the strings
-            _newCategory = string.Empty;
+        // Validation
+        if (string.IsNullOrEmpty(_newCategory)) {
+            _errorMessage = "Empty input field";
+            return;
+        }
+
+        try {
             _errorMessage = string.Empty;
 
-            // Reload list
+            var newCategory = new Category() { Name = _newCategory, Color = DefaultColor };
+            await CategoryService.AddCategoryAsync(newCategory);
+
+            // Submitted without error -> clean and refresh
+            _newCategory = string.Empty;
             _categoriesList = await CategoryService.GetCategoriesAsync();
         }
-        else {
-            // Tell the user that the input field is empty
-            _errorMessage = "The input field is empty";
+        catch (Exception ex) {
+            _errorMessage = "An error has occured during creating your category";
+            Console.WriteLine($"Error in saving category: {ex.Message}");
         }
     }
 }

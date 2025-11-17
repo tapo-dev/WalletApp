@@ -13,11 +13,9 @@
             }
         </ul>
     }
-    else {
-        <p>@_errorMessage</p>
-    }
     <input type="text" @bind="_newSubcategoryName"/>
     <button @onclick="SubmitNewSubcategory">Add new subcategory</button>
+    <p>@_errorMessage</p>
 }
 
 @code {
@@ -26,20 +24,29 @@
 
     private bool _isExpanded = false;
     private string _newSubcategoryName = string.Empty;
-    private string _errorMessage = "No subcategories found";
+    private string _errorMessage = string.Empty;
 
-    public void ToggleSubcategories() {
+    private void ToggleSubcategories() {
         _isExpanded = !_isExpanded;
     }
 
     private async Task SubmitNewSubcategory() {
-        if (_newSubcategoryName.Any()) {
-            var newSubcategory = new Subcategory() { Name = _newSubcategoryName, CategoryId = CategoryData.Id};
-            await CategoryService.AddSubCategoryAsync(newSubcategory);
-            
-            // Empty the strings
-            _newSubcategoryName = string.Empty;
+        if (string.IsNullOrEmpty(_newSubcategoryName)) {
+            _errorMessage = "Empty input field";
+            return;
+        }
+
+        try {
             _errorMessage = string.Empty;
+
+            var newSubcategory = new Subcategory() { Name = _newSubcategoryName, CategoryId = CategoryData.Id };
+            await CategoryService.AddSubCategoryAsync(newSubcategory);
+
+            _newSubcategoryName = string.Empty;
+        }
+        catch (Exception ex) {
+            _errorMessage = "An error has occured during creating your subcategory";
+            Console.WriteLine($"Error in saving subcategory: {ex.Message}");
         }
     }
 }
