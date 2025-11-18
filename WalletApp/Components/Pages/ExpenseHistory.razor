@@ -5,7 +5,26 @@
 <h3>ExpenseHistory</h3>
 
 @if (_expenses.Any()) {
-    
+    <table class="table">
+        <thead> <tr>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Subcategory</th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in _expenses) {
+                <tr>
+                    <td>@expense.Name</td>
+                    <td>@expense.Amount</td>
+                    <td>@expense.Subcategory.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else {
+    <p>No expenses added yet</p>
 }
 
 @code {

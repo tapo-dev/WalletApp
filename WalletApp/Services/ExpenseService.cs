@@ -12,7 +12,7 @@ public class ExpenseService : IExpenseService {
     }
 
     public async Task<List<Expense>> GetAllExpensesAsync() => 
-        await _context.Expenses.ToListAsync();
+        await _context.Expenses.Include(expense => expense.Subcategory).ToListAsync();
     public async Task AddExpenseAsync(Expense expense) {
         await _context.Expenses.AddAsync(expense);
         await _context.SaveChangesAsync();
