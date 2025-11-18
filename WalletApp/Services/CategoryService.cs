@@ -11,19 +11,50 @@ public class CategoryService : ICategoryService {
         _context = context;
     }
 
-    public async Task<List<Category>> GetCategoriesAsync() =>
-        await _context.Categories.Include(c => c.Subcategories).ToListAsync();
+    public async Task<List<Category>> GetCategoriesAsync() {
+        try {
+            var categories = await _context.Categories.Include(c => c.Subcategories)
+                .ToListAsync();
+            return categories;
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error getting all the categories: {ex.Message}");
+            return new List<Category>();
+        }
+    }
     
     public async Task AddCategoryAsync(Category newCategory) {
-        await _context.Categories.AddAsync(newCategory);
-        await _context.SaveChangesAsync();
+        try {
+            await _context.Categories.AddAsync(newCategory);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error in adding a category: {ex.Message}");
+            throw;
+        }
     }
 
     public async Task AddSubCategoryAsync(Subcategory subcategory) {
-        await _context.Subcategories.AddAsync(subcategory);
-        await _context.SaveChangesAsync();
+        try {
+            await _context.Subcategories.AddAsync(subcategory);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error in adding a subcategory: {ex.Message}");
+            throw;
+        }
     }
 
-    public async Task<List<Subcategory>> GetSubcategoriesFromCategoryAsync(int categoryId) =>
-        await _context.Subcategories.Where(subcategory => subcategory.Category.Id == categoryId).ToListAsync();
+    public async Task<List<Subcategory>> GetSubcategoriesFromCategoryAsync(int categoryId) {
+        try {
+            var subcategories = await _context.Subcategories
+                .Where(subcategory => subcategory.Category.Id == categoryId)
+                .ToListAsync();
+            return subcategories;
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error getting all the subcategories: {ex.Message}");
+            return new List<Subcategory>();
+        }
+    }
 }
