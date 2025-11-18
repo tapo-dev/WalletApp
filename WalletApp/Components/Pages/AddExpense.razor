@@ -55,6 +55,7 @@
 
         try {
             _errorMessage = string.Empty;
+            _newExpense.DateAdded = DateTime.Now;
 
             // Adds new expense
             await ExpenseService.AddExpenseAsync(_newExpense);

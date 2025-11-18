@@ -1,72 +1,24 @@
 ﻿@page "/"
-@using Microsoft.EntityFrameworkCore
 @using WalletApp.Data
-@using WalletApp.Models
-@inject AppDbContext Db
+@using WalletApp.Services
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
-
-<h1>Test page</h1>
-
-<h3>Add new user</h3>
-<input @bind="newUserName" placeholder="Enter name..." />
-<button @onclick=AddUser>Add</button>
-<button class="btn btn-danger" @onclick="ClearUsers">Delete all users</button>
-
-<h3>All users:</h3>
-<ul>
-    @if (users.Count == 0)
-    {
-        <li><em>No users found yet</em></li>
-    }
-    else
-    {
-        @foreach (var user in users)
-        {
-            <li>@user.Name</li>
-        }
-    }
-</ul>
+<p>Total amount this month: @_totalOfCurrentMonth</p>
 
 @code {
-    private List<User> users = new();
-    private List<Expense> expenses = new();
-    private string newUserName = "";
-    private string expenseName = "";
-    private float expenseAmount;
+    [Inject] public IStatisticsService StatisticsService { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
-    {
-        // načti uživatele z DB při startu
-        users = await Db.Users.ToListAsync();
-        expenses = await Db.Expenses.ToListAsync();
-    }
+    private readonly DateTime _currentDateTime = DateTime.Now;
+    private double _totalOfCurrentMonth;
 
-    private async Task AddUser()
-    {
-        if (!string.IsNullOrWhiteSpace(newUserName))
-        {
-            var user = new User { Name = newUserName };
-            Db.Users.Add(user);
-            await Db.SaveChangesAsync();
-
-            // znovu načti seznam
-            users = await Db.Users.ToListAsync();
-
-            // vyčisti input
-            newUserName = "";
-
-            StateHasChanged(); // přerenderování UI
+    protected override async Task OnInitializedAsync() {
+        try {
+            await base.OnInitializedAsync();
+            _totalOfCurrentMonth = await StatisticsService.GetTotalByMonthAsync(_currentDateTime.Month, _currentDateTime.Year);
         }
-    }
-    
-    private async Task ClearUsers()
-    {
-        Db.Users.RemoveRange(Db.Users);
-        await Db.SaveChangesAsync();
-
-        users.Clear();
-        StateHasChanged();
+        catch (Exception ex) {
+            Console.WriteLine($"Error in initializing Home page: {ex.Message}");
+        }
     }
 }

@@ -16,6 +16,7 @@ builder.Services.AddRazorComponents()
 // Register all the services
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 
 var app = builder.Build();
 
