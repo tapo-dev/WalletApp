@@ -31,7 +31,12 @@ namespace WalletApp.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Categories");
 
@@ -40,19 +45,22 @@ namespace WalletApp.Migrations
                         {
                             Id = 1,
                             Color = "#DB3F21",
-                            Name = "Food"
+                            Name = "Food",
+                            UserId = 1
                         },
                         new
                         {
                             Id = 2,
                             Color = "#2338C4",
-                            Name = "Housing"
+                            Name = "Housing",
+                            UserId = 1
                         },
                         new
                         {
                             Id = 3,
                             Color = "#23C423",
-                            Name = "Fun"
+                            Name = "Fun",
+                            UserId = 1
                         });
                 });
 
@@ -75,7 +83,7 @@ namespace WalletApp.Migrations
                     b.Property<int>("SubcategoryId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -85,6 +93,35 @@ namespace WalletApp.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Expenses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 256.0,
+                            DateAdded = new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1840),
+                            Name = "Test",
+                            SubcategoryId = 1,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Amount = 512.0,
+                            DateAdded = new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1870),
+                            Name = "Test2",
+                            SubcategoryId = 1,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Amount = 128.0,
+                            DateAdded = new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1870),
+                            Name = "Test3",
+                            SubcategoryId = 3,
+                            UserId = 1
+                        });
                 });
 
             modelBuilder.Entity("WalletApp.Models.Subcategory", b =>
@@ -100,9 +137,14 @@ namespace WalletApp.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Subcategories");
 
@@ -111,19 +153,22 @@ namespace WalletApp.Migrations
                         {
                             Id = 1,
                             CategoryId = 1,
-                            Name = "Restaurant"
+                            Name = "Restaurant",
+                            UserId = 1
                         },
                         new
                         {
                             Id = 2,
                             CategoryId = 1,
-                            Name = "Groceries"
+                            Name = "Groceries",
+                            UserId = 1
                         },
                         new
                         {
                             Id = 3,
                             CategoryId = 2,
-                            Name = "Rent"
+                            Name = "Rent",
+                            UserId = 1
                         });
                 });
 
@@ -147,6 +192,26 @@ namespace WalletApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Balance = 0f,
+                            Name = "admin",
+                            Password = "admin"
+                        });
+                });
+
+            modelBuilder.Entity("WalletApp.Models.Category", b =>
+                {
+                    b.HasOne("WalletApp.Models.User", "User")
+                        .WithMany("Categories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WalletApp.Models.Expense", b =>
@@ -157,11 +222,15 @@ namespace WalletApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WalletApp.Models.User", null)
-                        .WithMany("Expenses_list")
-                        .HasForeignKey("UserId");
+                    b.HasOne("WalletApp.Models.User", "User")
+                        .WithMany("Expenses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Subcategory");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WalletApp.Models.Subcategory", b =>
@@ -172,7 +241,15 @@ namespace WalletApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WalletApp.Models.User", "User")
+                        .WithMany("Subcategories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Category");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WalletApp.Models.Category", b =>
@@ -187,7 +264,11 @@ namespace WalletApp.Migrations
 
             modelBuilder.Entity("WalletApp.Models.User", b =>
                 {
-                    b.Navigation("Expenses_list");
+                    b.Navigation("Categories");
+
+                    b.Navigation("Expenses");
+
+                    b.Navigation("Subcategories");
                 });
 #pragma warning restore 612, 618
         }
