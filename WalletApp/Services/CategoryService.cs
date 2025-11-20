@@ -11,9 +11,11 @@ public class CategoryService : ICategoryService {
         _context = context;
     }
 
-    public async Task<List<Category>> GetCategoriesAsync() {
+    public async Task<List<Category>> GetCategoriesAsync(int userId) {
         try {
-            var categories = await _context.Categories.Include(c => c.Subcategories)
+            var categories = await _context.Categories
+                .Where(c => c.UserId == userId)
+                .Include(c => c.Subcategories)
                 .ToListAsync();
             return categories;
         }
@@ -45,10 +47,11 @@ public class CategoryService : ICategoryService {
         }
     }
 
-    public async Task<List<Subcategory>> GetSubcategoriesFromCategoryAsync(int categoryId) {
+    public async Task<List<Subcategory>> GetSubcategoriesFromCategoryAsync(int categoryId, int userId) {
         try {
             var subcategories = await _context.Subcategories
-                .Where(subcategory => subcategory.Category.Id == categoryId)
+                .Where(s => s.UserId == userId)
+                .Where(s => s.CategoryId == categoryId)
                 .ToListAsync();
             return subcategories;
         }

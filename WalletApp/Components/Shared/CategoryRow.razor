@@ -25,6 +25,9 @@
     private bool _isExpanded = false;
     private string _newSubcategoryName = string.Empty;
     private string _errorMessage = string.Empty;
+    
+    // TODO: Remove after making login and register pages
+    private int temporaryUserIdForTesting = 1;
 
     private void ToggleSubcategories() {
         _isExpanded = !_isExpanded;
@@ -39,7 +42,8 @@
         try {
             _errorMessage = string.Empty;
 
-            var newSubcategory = new Subcategory() { Name = _newSubcategoryName, CategoryId = CategoryData.Id };
+            var newSubcategory = new Subcategory() 
+                { Name = _newSubcategoryName, CategoryId = CategoryData.Id, UserId = temporaryUserIdForTesting };
             await CategoryService.AddSubCategoryAsync(newSubcategory);
 
             _newSubcategoryName = string.Empty;

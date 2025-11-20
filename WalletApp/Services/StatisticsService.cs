@@ -13,11 +13,12 @@ public class StatisticsService : IStatisticsService {
         _context = context;
     }
     
-    public async Task<double> GetTotalByMonthAsync(int month, int year) {
+    public async Task<double> GetTotalByMonthAsync(int month, int year, int userId) {
         try {
             var expenses = await _context.Expenses
-                .Where(expense => expense.DateAdded.Month.Equals(month))
-                .Where(expense => expense.DateAdded.Year.Equals(year))
+                .Where(e => e.UserId == userId)
+                .Where(expense => expense.DateAdded.Month == month)
+                .Where(expense => expense.DateAdded.Year == year)
                 .SumAsync(expense => expense.Amount);
 
             return expenses;
@@ -28,11 +29,12 @@ public class StatisticsService : IStatisticsService {
         }
     }
 
-    public async Task<Dictionary<string, double>> GetCategoryTotalsAsync(int month, int year) {
+    public async Task<Dictionary<string, double>> GetCategoryTotalsAsync(int month, int year, int userId) {
         try {
             var expenses = await _context.Expenses
-                .Where(expense => expense.DateAdded.Month.Equals(month))
-                .Where(expense => expense.DateAdded.Year.Equals(year))
+                .Where(e => e.UserId == userId)
+                .Where(expense => expense.DateAdded.Month == month)
+                .Where(expense => expense.DateAdded.Year == year)
                 .GroupBy(expense => expense.Subcategory.Category.Name)
                 .Select(g => new { CategoryName = g.Key, TotalAmount = g.Sum(x => x.Amount) })
                 .ToDictionaryAsync(key => key.CategoryName, total => total.TotalAmount);

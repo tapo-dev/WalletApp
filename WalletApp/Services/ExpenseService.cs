@@ -11,9 +11,11 @@ public class ExpenseService : IExpenseService {
         _context = context;
     }
 
-    public async Task<List<Expense>> GetAllExpensesAsync() {
+    public async Task<List<Expense>> GetAllExpensesAsync(int userId) {
         try {
-            var expenses = await _context.Expenses.Include(expense => expense.Subcategory)
+            var expenses = await _context.Expenses
+                .Where(e => e.UserId == userId)
+                .Include(expense => expense.Subcategory)
                 .ToListAsync();
             return expenses;
         }

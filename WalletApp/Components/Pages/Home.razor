@@ -27,12 +27,17 @@
     private readonly DateTime _currentDateTime = DateTime.Now;
     private double _totalOfCurrentMonth;
     private Dictionary<string, double> _totalOfCategories = new Dictionary<string, double>();
+    
+    // TODO: Remove after making login and register pages
+    private int temporaryUserIdForTesting = 1;
 
     protected override async Task OnInitializedAsync() {
         try {
             await base.OnInitializedAsync();
-            _totalOfCurrentMonth = await StatisticsService.GetTotalByMonthAsync(_currentDateTime.Month, _currentDateTime.Year);
-            _totalOfCategories = await StatisticsService.GetCategoryTotalsAsync(_currentDateTime.Month, _currentDateTime.Year);
+            _totalOfCurrentMonth = await StatisticsService
+                .GetTotalByMonthAsync(_currentDateTime.Month, _currentDateTime.Year, temporaryUserIdForTesting);
+            _totalOfCategories = await StatisticsService
+                .GetCategoryTotalsAsync(_currentDateTime.Month, _currentDateTime.Year, temporaryUserIdForTesting);
         }
         catch (Exception ex) {
             Console.WriteLine($"Error in initializing Home page: {ex.Message}");

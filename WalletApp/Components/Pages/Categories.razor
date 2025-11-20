@@ -29,10 +29,13 @@
     private string _errorMessage = string.Empty;
     private const string DefaultColor = "#8A8A8A";
 
+    // TODO: Remove after making login and register pages
+    private int temporaryUserIdForTesting = 1;
+
     protected override async Task OnInitializedAsync() {
         try {
             await base.OnInitializedAsync();
-            _categoriesList = await CategoryService.GetCategoriesAsync();
+            _categoriesList = await CategoryService.GetCategoriesAsync(temporaryUserIdForTesting);
         }
         catch (Exception ex) {
             Console.WriteLine($"Error in initializing Categories page: {ex.Message}");
@@ -49,12 +52,12 @@
         try {
             _errorMessage = string.Empty;
 
-            var newCategory = new Category() { Name = _newCategory, Color = DefaultColor };
+            var newCategory = new Category() { Name = _newCategory, Color = DefaultColor, UserId = temporaryUserIdForTesting};
             await CategoryService.AddCategoryAsync(newCategory);
 
             // Submitted without error -> clean and refresh
             _newCategory = string.Empty;
-            _categoriesList = await CategoryService.GetCategoriesAsync();
+            _categoriesList = await CategoryService.GetCategoriesAsync(temporaryUserIdForTesting);
         }
         catch (Exception ex) {
             _errorMessage = "An error has occured during creating your category";

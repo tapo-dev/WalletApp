@@ -34,11 +34,12 @@ else {
     
     private List<Expense> _expenses = new List<Expense>();
     
-    private string _errorMessage = string.Empty;
+    // TODO: Remove after making login and register pages
+    private int temporaryUserIdForTesting = 1;
 
     protected override async Task OnInitializedAsync() {
         try {
-            _expenses = await ExpenseService.GetAllExpensesAsync();
+            _expenses = await ExpenseService.GetAllExpensesAsync(temporaryUserIdForTesting);
             await base.OnInitializedAsync();
         }
         catch (Exception ex) {
