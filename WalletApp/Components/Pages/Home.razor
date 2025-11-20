@@ -5,17 +5,34 @@
 
 <PageTitle>Home</PageTitle>
 <p>Total amount this month: @_totalOfCurrentMonth</p>
+<table class="table">
+    <thead> <tr>
+        <th>Category</th>
+        <th>Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in _totalOfCategories) {
+            <tr>
+                <td>@category.Key</td>
+                <td>@category.Value.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
     [Inject] public IStatisticsService StatisticsService { get; set; } = default!;
 
     private readonly DateTime _currentDateTime = DateTime.Now;
     private double _totalOfCurrentMonth;
+    private Dictionary<string, double> _totalOfCategories = new Dictionary<string, double>();
 
     protected override async Task OnInitializedAsync() {
         try {
             await base.OnInitializedAsync();
             _totalOfCurrentMonth = await StatisticsService.GetTotalByMonthAsync(_currentDateTime.Month, _currentDateTime.Year);
+            _totalOfCategories = await StatisticsService.GetCategoryTotalsAsync(_currentDateTime.Month, _currentDateTime.Year);
         }
         catch (Exception ex) {
             Console.WriteLine($"Error in initializing Home page: {ex.Message}");
