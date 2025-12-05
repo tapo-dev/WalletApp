@@ -31,16 +31,22 @@ else {
 
 @code {
     [Inject] IExpenseService ExpenseService { get; set; } = default!;
+    [Inject] UserState UserState { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
     
     private List<Expense> _expenses = new List<Expense>();
-    
-    // TODO: Remove after making login and register pages
-    private int temporaryUserIdForTesting = 1;
 
     protected override async Task OnInitializedAsync() {
         try {
-            _expenses = await ExpenseService.GetAllExpensesAsync(temporaryUserIdForTesting);
             await base.OnInitializedAsync();
+            
+            var user = UserState.CurrentUser;
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+            
+            _expenses = await ExpenseService.GetAllExpensesAsync(user.Id);
         }
         catch (Exception ex) {
             Console.WriteLine($"Error in initializing ExpenseHistory page: {ex.Message}");

@@ -20,14 +20,13 @@
 
 @code {
     [Parameter] public Category CategoryData { get; set; } = default!;
-    [Inject] public ICategoryService CategoryService { get; set; } = default!;
+    [Inject] ICategoryService CategoryService { get; set; } = default!;
+    [Inject] UserState UserState { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
     private bool _isExpanded = false;
     private string _newSubcategoryName = string.Empty;
     private string _errorMessage = string.Empty;
-    
-    // TODO: Remove after making login and register pages
-    private int temporaryUserIdForTesting = 1;
 
     private void ToggleSubcategories() {
         _isExpanded = !_isExpanded;
@@ -40,10 +39,16 @@
         }
 
         try {
+            var user = UserState.CurrentUser;
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+            
             _errorMessage = string.Empty;
 
             var newSubcategory = new Subcategory() 
-                { Name = _newSubcategoryName, CategoryId = CategoryData.Id, UserId = temporaryUserIdForTesting };
+                { Name = _newSubcategoryName, CategoryId = CategoryData.Id, UserId = user.Id };
             await CategoryService.AddSubCategoryAsync(newSubcategory);
 
             _newSubcategoryName = string.Empty;

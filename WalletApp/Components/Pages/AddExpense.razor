@@ -26,8 +26,10 @@
 <p>@_errorMessage</p>
 
 @code {
-    [Inject] public ICategoryService CategoryService { get; set; } = default!;
-    [Inject] public IExpenseService ExpenseService { get; set; } = default!;
+    [Inject] ICategoryService CategoryService { get; set; } = default!;
+    [Inject] IExpenseService ExpenseService { get; set; } = default!;
+    [Inject] UserState UserState { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
     private List<Subcategory> _subcategories = new List<Subcategory>();
     private List<Category> _allCategories = new List<Category>();
@@ -36,14 +38,18 @@
     private Expense _newExpense = new Expense();
 
     private string _errorMessage = string.Empty;
-    
-    // TODO: Remove after making login and register pages
-    private int temporaryUserIdForTesting = 1;
 
     protected override async Task OnInitializedAsync() {
         try {
             await base.OnInitializedAsync();
-            _allCategories = await CategoryService.GetCategoriesAsync(temporaryUserIdForTesting);
+            
+            var user = UserState.CurrentUser;
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+            
+            _allCategories = await CategoryService.GetCategoriesAsync(user.Id);
         }
         catch (Exception ex) {
             Console.WriteLine($"Error in initializing AddExpense page: {ex.Message}");
@@ -57,9 +63,15 @@
         }
 
         try {
+            var user = UserState.CurrentUser;
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+            
             _errorMessage = string.Empty;
             _newExpense.DateAdded = DateTime.Now;
-            _newExpense.UserId = temporaryUserIdForTesting;
+            _newExpense.UserId = user.Id;
 
             // Adds new expense
             await ExpenseService.AddExpenseAsync(_newExpense);
@@ -75,8 +87,13 @@
 
     private async Task OnCategorySelectedAsync() {
         try {
+            var user = UserState.CurrentUser;
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
             _newExpense.SubcategoryId = 0;
-            _subcategories = await CategoryService.GetSubcategoriesFromCategoryAsync(_category.Id, temporaryUserIdForTesting);
+            _subcategories = await CategoryService.GetSubcategoriesFromCategoryAsync(_category.Id, user.Id);
         }
         catch (Exception ex) {
             _errorMessage = "An error has occured during selecting your category";

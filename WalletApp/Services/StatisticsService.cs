@@ -7,8 +7,6 @@ namespace WalletApp.Services;
 public class StatisticsService : IStatisticsService {
     private readonly AppDbContext _context;
     
-    
-    
     public StatisticsService(AppDbContext context) {
         _context = context;
     }

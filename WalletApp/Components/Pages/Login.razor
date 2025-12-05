@@ -1,0 +1,47 @@
+@page "/login"
+@using WalletApp.Services
+@rendermode InteractiveServer
+
+<p>Username:</p>
+<input type="text" @bind="@_username"/>
+<p>Password:</p>
+<input type="password" @bind="@_password"/>
+<button @onclick="SubmitLogin">Log in</button>
+<p>@_errorMessage</p>
+
+@code {
+    [Inject] IUserService UserService { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] UserState UserState { get; set; } = default!;
+
+    private string _username = string.Empty;
+    private string _password = string.Empty;
+    private string _errorMessage = string.Empty;
+
+    private async Task SubmitLogin() {
+        try {
+            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(_password)) {
+                _errorMessage = "Empty input field";
+                return;
+            }
+
+            var user = await UserService.LoginUserAsync(_username, _password);
+            if (user == null) {
+                _errorMessage = "Wrong name or password";
+                return;
+            }
+
+            _username = string.Empty;
+            _password = string.Empty;
+            _errorMessage = string.Empty;
+
+            Console.WriteLine($"User logged in successfully");
+            UserState.SetUser(user);
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error in logging User: {ex.Message}");
+            _errorMessage = "An error has occured during your login";
+        }
+    }
+}

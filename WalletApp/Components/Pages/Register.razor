@@ -1,0 +1,53 @@
+@page "/register"
+@using WalletApp.Models
+@using WalletApp.Services
+@rendermode InteractiveServer
+
+<p>Username:</p>
+<input type="text" @bind="@_newUsername"/>
+<p>Password:</p>
+<input type="password" @bind="@_newPassword"/>
+<p>Confirm password:</p>
+<input type="password" @bind="@_newConfirmedPassword"/>
+<button @onclick="SubmitNewUser">Create account</button>
+<p>@_errorMessage</p>
+
+@code {
+    [Inject] IUserService UserService { get; set; } = default!;
+    
+    private string _newUsername = string.Empty;
+    private string _newPassword = string.Empty;
+    private string _newConfirmedPassword = string.Empty;
+    private string _errorMessage = string.Empty;
+
+    private async Task SubmitNewUser() {
+        try {
+            if (_newPassword != _newConfirmedPassword) {
+                _errorMessage = "Passwords are not matching";
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_newUsername) ||
+                string.IsNullOrEmpty(_newPassword) ||
+                string.IsNullOrEmpty(_newConfirmedPassword)) {
+                _errorMessage = "Empty input field";
+                return;
+            }
+
+            if (await UserService.RegisterUserAsync(_newUsername, _newPassword)) {
+                // Registering was successful, clean up inputs
+                _errorMessage = string.Empty;
+                _newUsername = string.Empty;
+                _newPassword = string.Empty;
+                _newConfirmedPassword = string.Empty;
+            }
+            else {
+                _errorMessage = "User already exists";
+            }
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error in registering User: {ex.Message}");
+            _errorMessage = "An error has occured during your registration";
+        }
+    }
+}

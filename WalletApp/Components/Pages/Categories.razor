@@ -21,21 +21,27 @@
 @code {
 
     // Dependency injection
-    [Inject] public ICategoryService CategoryService { get; set; } = default!;
+    [Inject] ICategoryService CategoryService { get; set; } = default!;
+    [Inject] UserState UserState { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
-    private List<Category> _categoriesList = new List<Category>();
+    private List<Category> _categoriesList = [];
 
     private string _newCategory = string.Empty;
     private string _errorMessage = string.Empty;
     private const string DefaultColor = "#8A8A8A";
 
-    // TODO: Remove after making login and register pages
-    private int temporaryUserIdForTesting = 1;
-
     protected override async Task OnInitializedAsync() {
         try {
             await base.OnInitializedAsync();
-            _categoriesList = await CategoryService.GetCategoriesAsync(temporaryUserIdForTesting);
+
+            var user = UserState.CurrentUser;
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+            
+            _categoriesList = await CategoryService.GetCategoriesAsync(user.Id);
         }
         catch (Exception ex) {
             Console.WriteLine($"Error in initializing Categories page: {ex.Message}");
@@ -51,13 +57,20 @@
 
         try {
             _errorMessage = string.Empty;
+            var user = UserState.CurrentUser;
+            
+            // If session expires
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
 
-            var newCategory = new Category() { Name = _newCategory, Color = DefaultColor, UserId = temporaryUserIdForTesting};
+            var newCategory = new Category() { Name = _newCategory, Color = DefaultColor, UserId = user.Id};
             await CategoryService.AddCategoryAsync(newCategory);
 
             // Submitted without error -> clean and refresh
             _newCategory = string.Empty;
-            _categoriesList = await CategoryService.GetCategoriesAsync(temporaryUserIdForTesting);
+            _categoriesList = await CategoryService.GetCategoriesAsync(user.Id);
         }
         catch (Exception ex) {
             _errorMessage = "An error has occured during creating your category";

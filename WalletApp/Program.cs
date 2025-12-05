@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WalletApp.Components;
 using WalletApp.Data;
+using WalletApp.Models;
 using WalletApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<UserState>();
 
 var app = builder.Build();
 
