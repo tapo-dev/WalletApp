@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using WalletApp.Services
+@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">WalletApp</a>
     </div>
@@ -8,34 +11,42 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="categories">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Categories
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="add-expense">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Add expense
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="history">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> History
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="register">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Register
-            </NavLink>
-        </div>
+        @if (UserState.CurrentUser != null) {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="categories">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Categories
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="add-expense">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Add expense
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="history">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> History
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
+
+@code {
+    [Inject] UserState UserState { get; set; } = default!;
+    
+    protected override void OnInitialized() {
+        UserState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose() {
+        UserState.OnChange -= StateHasChanged;
+    }
+}
