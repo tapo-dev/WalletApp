@@ -11,11 +11,11 @@ public class UserService : IUserService {
         _context = context;
     }
     
-    public async Task<bool> RegisterUserAsync(string username, string password) {
+    public async Task<User?> RegisterUserAsync(string username, string password) {
         try {
             if (await _context.Users.AnyAsync(u => u.Name == username)) {
                 Console.WriteLine($"There already is a user with this name.");
-                return false;
+                return null;
             }
 
             // Hashing
@@ -27,12 +27,32 @@ public class UserService : IUserService {
             var newUser = new User(username, hashedPassword);
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            return true;
+            
+            await CreateDefaultCategories(newUser.Id);
+            
+            return newUser;
         }
         catch (Exception ex) {
             Console.WriteLine($"An error has occured during registering a new user: {ex.Message}");
             throw;
         }
+    }
+    
+    private async Task CreateDefaultCategories(int userId) {
+        var catFood = new Category { Name = "Food", Color = "#DB3F21", UserId = userId };
+        catFood.Subcategories.Add(new Subcategory { Name = "Restaurant", UserId = userId });
+        catFood.Subcategories.Add(new Subcategory { Name = "Groceries", UserId = userId });
+
+        var catHousing = new Category { Name = "Housing", Color = "#2338C4", UserId = userId };
+        catHousing.Subcategories.Add(new Subcategory { Name = "Rent", UserId = userId });
+        catHousing.Subcategories.Add(new Subcategory { Name = "Utilities", UserId = userId });
+
+        var catFun = new Category { Name = "Fun", Color = "#23C423", UserId = userId };
+        catFun.Subcategories.Add(new Subcategory { Name = "Cinema", UserId = userId });
+
+        await _context.Categories.AddRangeAsync(catFood, catHousing, catFun);
+        
+        await _context.SaveChangesAsync();
     }
 
     public async Task<User?> LoginUserAsync(string username, string password) {

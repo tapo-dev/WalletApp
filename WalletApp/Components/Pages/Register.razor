@@ -13,6 +13,8 @@
 
 @code {
     [Inject] IUserService UserService { get; set; } = default!;
+    [Inject] UserState UserState { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
     
     private string _newUsername = string.Empty;
     private string _newPassword = string.Empty;
@@ -33,12 +35,12 @@
                 return;
             }
 
-            if (await UserService.RegisterUserAsync(_newUsername, _newPassword)) {
-                // Registering was successful, clean up inputs
-                _errorMessage = string.Empty;
-                _newUsername = string.Empty;
-                _newPassword = string.Empty;
-                _newConfirmedPassword = string.Empty;
+            var newUser = await UserService.RegisterUserAsync(_newUsername, _newPassword);
+
+            if (newUser != null) {
+                // Autologin
+                UserState.SetUser(newUser);
+                NavigationManager.NavigateTo("/");
             }
             else {
                 _errorMessage = "User already exists";

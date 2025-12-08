@@ -14,6 +14,10 @@
     {
         // Prints out all the categories
         <CategoryRow CategoryData="@category"/>
+        
+        <button class="btn btn-danger btn-sm" @onclick="() => RemoveCategory(category)">
+            Remove
+        </button>
     }
 }
 
@@ -29,6 +33,7 @@
 
     private string _newCategory = string.Empty;
     private string _errorMessage = string.Empty;
+    private Category _categoryToRemove;
     private const string DefaultColor = "#8A8A8A";
 
     protected override async Task OnInitializedAsync() {
@@ -75,6 +80,20 @@
         catch (Exception ex) {
             _errorMessage = "An error has occured during creating your category";
             Console.WriteLine($"Error in saving category: {ex.Message}");
+        }
+    }
+
+    private async Task RemoveCategory(Category category) {
+        try {
+            await CategoryService.RemoveCategoryAsync(category);
+            // Musíme seznam obnovit, aby zmizela z obrazovky
+            var user = UserState.CurrentUser;
+            if (user != null) {
+                _categoriesList = await CategoryService.GetCategoriesAsync(user.Id);
+            }
+        }
+        catch (Exception ex) {
+            Console.WriteLine(ex.Message);
         }
     }
 }

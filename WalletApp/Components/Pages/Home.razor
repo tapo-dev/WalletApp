@@ -3,7 +3,7 @@
 @using WalletApp.Services
 
 <PageTitle>Home</PageTitle>
-<p>Total amount this month: @_totalOfCurrentMonth</p>
+<p>Total amount this month: @_totalOfCurrentMonth.ToString("C")</p>
 <table class="table">
     <thead> <tr>
         <th>Category</th>
@@ -27,7 +27,7 @@
 
     private readonly DateTime _currentDateTime = DateTime.Now;
     private double _totalOfCurrentMonth;
-    private Dictionary<string, double> _totalOfCategories = new Dictionary<string, double>();
+    private Dictionary<string, double> _totalOfCategories = new();
 
     protected override async Task OnInitializedAsync() {
         try {

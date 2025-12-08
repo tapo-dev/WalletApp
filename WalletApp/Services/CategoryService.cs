@@ -36,6 +36,17 @@ public class CategoryService : ICategoryService {
         }
     }
 
+    public async Task RemoveCategoryAsync(Category category) {
+        try {
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"An error has occured during removing a category: {ex.Message}");
+            throw;
+        }
+    }
+
     public async Task AddSubCategoryAsync(Subcategory subcategory) {
         try {
             await _context.Subcategories.AddAsync(subcategory);
