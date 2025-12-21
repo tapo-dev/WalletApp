@@ -1,3 +1,4 @@
+using ApexCharts;
 using Microsoft.EntityFrameworkCore;
 using WalletApp.Components;
 using WalletApp.Data;
@@ -13,6 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Apex charts for graphs
+builder.Services.AddApexCharts();
 
 // Register all the services
 builder.Services.AddScoped<ICategoryService, CategoryService>();

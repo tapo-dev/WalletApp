@@ -1,6 +1,9 @@
 ﻿@page "/"
-@using WalletApp.Data
 @using WalletApp.Services
+@using __Blazor.ApexCharts
+@using ApexCharts
+@using WalletApp.Models
+@using WalletApp.Models.DTOs
 
 <PageTitle>Home</PageTitle>
 <p>Total amount this month: @_totalOfCurrentMonth.ToString("C")</p>
@@ -11,27 +14,55 @@
     </tr>
     </thead>
     <tbody>
-        @foreach (var category in _totalOfCategories) {
-            <tr>
-                <td>@category.Key</td>
-                <td>@category.Value.ToString("C")</td>
-            </tr>
-        }
+    @foreach (var category in _totalOfCategories) {
+        <tr>
+            <td>@category.Key</td>
+            <td>@category.Value.ToString("C")</td>
+        </tr>
+    }
     </tbody>
 </table>
+
+<div style="width: 40%; height: 40%">
+    <ApexChart TItem="GraphData"
+               Title="Expenses graph" Options=options>
+
+        <ApexPointSeries TItem="GraphData"
+                         Items="_totalOfCategoriesList"
+                         Name="Gross Value"
+                         SeriesType="SeriesType.Pie"
+                         XValue="@(c => c.Name)"
+                         YAggregate="@(c => c.Sum(c => (decimal) c.Amount))"
+                         OrderByDescending="e=>e.Y"
+                         ShowDataLabels />
+    </ApexChart>
+</div>
 
 @code {
     [Inject] IStatisticsService StatisticsService { get; set; } = default!;
     [Inject] UserState UserState { get; set; } = default!;
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] public IApexChartService ApexChartService { get; set; } = default!;
 
     private readonly DateTime _currentDateTime = DateTime.Now;
     private double _totalOfCurrentMonth;
     private Dictionary<string, double> _totalOfCategories = new();
 
+    private List<GraphData> _totalOfCategoriesList = new();
+    
+    // Apexcharts graph necessities
+    private ApexChartOptions<GraphData> options { get; set; } = new();
+
     protected override async Task OnInitializedAsync() {
         try {
             await base.OnInitializedAsync();
+            
+            // Apexcharts graph necessities
+            options.DataLabels = new DataLabels
+            {
+                Formatter = @"function(value, { seriesIndex, w }) {
+            return w.config.series[seriesIndex];}"
+            };
             
             var user = UserState.CurrentUser;
             if (user == null) {
@@ -43,6 +74,12 @@
                 .GetTotalByMonthAsync(_currentDateTime.Month, _currentDateTime.Year, user.Id);
             _totalOfCategories = await StatisticsService
                 .GetCategoryTotalsAsync(_currentDateTime.Month, _currentDateTime.Year, user.Id);
+
+            _totalOfCategoriesList.Clear(); // Just in case
+            foreach (var category in _totalOfCategories) {
+                var graphData = new GraphData(category.Key, category.Value);
+                _totalOfCategoriesList.Add(graphData);
+            }
         }
         catch (Exception ex) {
             Console.WriteLine($"Error in initializing Home page: {ex.Message}");
