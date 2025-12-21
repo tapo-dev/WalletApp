@@ -108,7 +108,7 @@ namespace WalletApp.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Balance", "Name", "Password" },
-                values: new object[] { 1, 0f, "admin", "admin" });
+                values: new object[] { 1, 0f, "test", "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=" });
 
             migrationBuilder.InsertData(
                 table: "Categories",
@@ -135,9 +135,9 @@ namespace WalletApp.Migrations
                 columns: new[] { "Id", "Amount", "DateAdded", "Name", "SubcategoryId", "UserId" },
                 values: new object[,]
                 {
-                    { 1, 256.0, new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1840), "Test", 1, 1 },
-                    { 2, 512.0, new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1870), "Test2", 1, 1 },
-                    { 3, 128.0, new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1870), "Test3", 3, 1 }
+                    { 1, 256.0, new DateTime(2025, 12, 21, 20, 46, 16, 56, DateTimeKind.Local).AddTicks(1820), "Test", 1, 1 },
+                    { 2, 512.0, new DateTime(2025, 12, 21, 20, 46, 16, 56, DateTimeKind.Local).AddTicks(1830), "Test2", 1, 1 },
+                    { 3, 128.0, new DateTime(2025, 12, 21, 20, 46, 16, 56, DateTimeKind.Local).AddTicks(1830), "Test3", 3, 1 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -15,7 +15,7 @@ public class AppDbContext : DbContext {
         int testUserId = 1;
 
         modelBuilder.Entity<User>().HasData(
-            new User("admin", "admin") { Id = testUserId, Balance = 0}
+            new User("test", "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=") { Id = testUserId, Balance = 0}
         );
         
         modelBuilder.Entity<Category>().HasData(

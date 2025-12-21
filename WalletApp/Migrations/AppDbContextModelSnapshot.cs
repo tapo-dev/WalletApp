@@ -99,7 +99,7 @@ namespace WalletApp.Migrations
                         {
                             Id = 1,
                             Amount = 256.0,
-                            DateAdded = new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1840),
+                            DateAdded = new DateTime(2025, 12, 21, 20, 46, 16, 56, DateTimeKind.Local).AddTicks(1820),
                             Name = "Test",
                             SubcategoryId = 1,
                             UserId = 1
@@ -108,7 +108,7 @@ namespace WalletApp.Migrations
                         {
                             Id = 2,
                             Amount = 512.0,
-                            DateAdded = new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1870),
+                            DateAdded = new DateTime(2025, 12, 21, 20, 46, 16, 56, DateTimeKind.Local).AddTicks(1830),
                             Name = "Test2",
                             SubcategoryId = 1,
                             UserId = 1
@@ -117,7 +117,7 @@ namespace WalletApp.Migrations
                         {
                             Id = 3,
                             Amount = 128.0,
-                            DateAdded = new DateTime(2025, 11, 20, 13, 49, 13, 253, DateTimeKind.Local).AddTicks(1870),
+                            DateAdded = new DateTime(2025, 12, 21, 20, 46, 16, 56, DateTimeKind.Local).AddTicks(1830),
                             Name = "Test3",
                             SubcategoryId = 3,
                             UserId = 1
@@ -198,8 +198,8 @@ namespace WalletApp.Migrations
                         {
                             Id = 1,
                             Balance = 0f,
-                            Name = "admin",
-                            Password = "admin"
+                            Name = "test",
+                            Password = "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg="
                         });
                 });
 
