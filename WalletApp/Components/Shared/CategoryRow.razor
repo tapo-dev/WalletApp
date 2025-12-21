@@ -10,6 +10,7 @@
                 <li>
                     @subcategory.Name
                 </li>
+                <button class="btn btn-danger btn-sm" @onclick="() => RemoveSubcategory(subcategory)">Remove</button>
             }
         </ul>
     }
@@ -23,6 +24,8 @@
     [Inject] ICategoryService CategoryService { get; set; } = default!;
     [Inject] UserState UserState { get; set; } = default!;
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
+    
+    private List<Subcategory> _subcategoriesList = [];
 
     private bool _isExpanded = false;
     private string _newSubcategoryName = string.Empty;
@@ -56,6 +59,21 @@
         catch (Exception ex) {
             _errorMessage = "An error has occured during creating your subcategory";
             Console.WriteLine($"Error in saving subcategory: {ex.Message}");
+        }
+    }
+    
+    private async Task RemoveSubcategory(Subcategory subcategory) {
+        try {
+            await CategoryService.RemoveSubcategoryAsync(subcategory);
+            
+            var user = UserState.CurrentUser;
+            if (user != null) {
+                _subcategoriesList = await CategoryService.GetSubcategoriesFromCategoryAsync(subcategory.CategoryId, user.Id);
+            }
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"An error has occured during removing a subcategory: {ex.Message}");
+            _errorMessage = "An error has occured during removing a subcategory";
         }
     }
 }

@@ -71,4 +71,15 @@ public class CategoryService : ICategoryService {
             return new List<Subcategory>();
         }
     }
+
+    public async Task RemoveSubcategoryAsync(Subcategory subcategory) {
+        try {
+            _context.Subcategories.Remove(subcategory);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"An error has occured during removing a subcategory: {ex.Message}");
+            throw;
+        }
+    }
 }

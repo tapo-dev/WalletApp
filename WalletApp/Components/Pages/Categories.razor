@@ -15,9 +15,7 @@
         // Prints out all the categories
         <CategoryRow CategoryData="@category"/>
         
-        <button class="btn btn-danger btn-sm" @onclick="() => RemoveCategory(category)">
-            Remove
-        </button>
+        <button class="btn btn-danger btn-sm" @onclick="() => RemoveCategory(category)">Remove</button>
     }
 }
 
@@ -86,14 +84,15 @@
     private async Task RemoveCategory(Category category) {
         try {
             await CategoryService.RemoveCategoryAsync(category);
-            // Musíme seznam obnovit, aby zmizela z obrazovky
+
             var user = UserState.CurrentUser;
             if (user != null) {
                 _categoriesList = await CategoryService.GetCategoriesAsync(user.Id);
             }
         }
         catch (Exception ex) {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine($"An error has occured during removing a category: {ex.Message}");
+            _errorMessage = "An error has occured during removing a category";
         }
     }
 }
