@@ -2,14 +2,16 @@
 @using WalletApp.Models
 @using WalletApp.Services
 
-<p>Username:</p>
-<input type="text" @bind="@_newUsername"/>
-<p>Password:</p>
-<input type="password" @bind="@_newPassword"/>
-<p>Confirm password:</p>
-<input type="password" @bind="@_newConfirmedPassword"/>
-<button @onclick="SubmitNewUser">Create account</button>
-<p>@_errorMessage</p>
+<form @onsubmit="SubmitNewUser">
+    <p>Username:</p>
+    <input type="text" @bind="@_newUsername"/>
+    <p>Password:</p>
+    <input type="password" @bind="@_newPassword"/>
+    <p>Confirm password:</p>
+    <input type="password" @bind="@_newConfirmedPassword"/>
+    <button type="submit">Create account</button>
+    <p>@_errorMessage</p>
+</form>
 
 @code {
     [Inject] IUserService UserService { get; set; } = default!;

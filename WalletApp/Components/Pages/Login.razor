@@ -1,12 +1,14 @@
 @page "/login"
 @using WalletApp.Services
 
-<p>Username:</p>
-<input type="text" @bind="@_username"/>
-<p>Password:</p>
-<input type="password" @bind="@_password"/>
-<button @onclick="SubmitLogin">Log in</button>
-<p>@_errorMessage</p>
+<form @onsubmit="SubmitLogin">
+    <p>Username:</p>
+    <input type="text" @bind="@_username"/>
+    <p>Password:</p>
+    <input type="password" @bind="@_password"/>
+    <button type="submit">Log in</button>
+    <p>@_errorMessage</p>
+</form>
 
 @code {
     [Inject] IUserService UserService { get; set; } = default!;
