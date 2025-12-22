@@ -14,9 +14,11 @@
             }
         </ul>
     }
-    <input type="text" @bind="_newSubcategoryName"/>
-    <button @onclick="SubmitNewSubcategory">Add new subcategory</button>
-    <p>@_errorMessage</p>
+    <form @onsubmit="SubmitNewSubcategory">
+        <input type="text" @bind="_newSubcategoryName"/>
+        <button type="submit">Add new subcategory</button>
+        <p>@_errorMessage</p>
+    </form>
 }
 
 @code {

@@ -3,11 +3,12 @@
 @using WalletApp.Models
 @using WalletApp.Components.Shared
 
-
 <h3>Categories</h3>
-<input type="text" @bind="_newCategory"/>
-<button @onclick="SubmitNewCategory">Add</button>
-<p>@_errorMessage</p>
+<form @onsubmit="SubmitNewCategory">
+    <input type="text" @bind="_newCategory"/>
+    <button type="submit">Add</button>
+    <p>@_errorMessage</p>
+</form>
 
 @if (_categoriesList.Any()) {
     @foreach(var category in _categoriesList)

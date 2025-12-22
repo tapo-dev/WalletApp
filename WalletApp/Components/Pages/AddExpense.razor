@@ -3,27 +3,28 @@
 @using WalletApp.Services
 
 <h3>Add Expense</h3>
-<!-- Form for adding an expense -->
-<p>Category</p>
-<select @bind="_category.Id" @bind:after="OnCategorySelectedAsync">
-    <option value="0">Choose category...</option>
-    @foreach (var category in _allCategories) {
-        <option value="@category.Id">@category.Name</option>
-    }
-</select>
-<p>Subcategory</p>
-<select @bind="_newExpense.SubcategoryId">
-    <option value="0">Choose subcategory...</option>
-    @foreach (var sub in _subcategories) {
-        <option value="@sub.Id">@sub.Name</option>
-    }
-</select>
-<p>Name (optional)</p>
-<input type="text" @bind="_newExpense.Name"/>
-<p>Amount</p>
-<input type="number" @bind="_newExpense.Amount"/>
-<button @onclick="SubmitNewExpense">Add expense</button>
-<p>@_errorMessage</p>
+<form @onsubmit="SubmitNewExpense">
+    <p>Category</p>
+    <select @bind="_category.Id" @bind:after="OnCategorySelectedAsync">
+        <option value="0">Choose category...</option>
+        @foreach (var category in _allCategories) {
+            <option value="@category.Id">@category.Name</option>
+        }
+    </select>
+    <p>Subcategory</p>
+    <select @bind="_newExpense.SubcategoryId">
+        <option value="0">Choose subcategory...</option>
+        @foreach (var sub in _subcategories) {
+            <option value="@sub.Id">@sub.Name</option>
+        }
+    </select>
+    <p>Name (optional)</p>
+    <input type="text" @bind="_newExpense.Name"/>
+    <p>Amount</p>
+    <input type="number" @bind="_newExpense.Amount"/>
+    <button type="submit">Add expense</button>
+    <p>@_errorMessage</p>
+</form>
 
 @code {
     [Inject] ICategoryService CategoryService { get; set; } = default!;
