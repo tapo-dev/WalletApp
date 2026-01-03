@@ -6,7 +6,7 @@
 @using WalletApp.Models.DTOs
 
 <PageTitle>Home</PageTitle>
-<p>Total amount this month: @_totalOfCurrentMonth.ToString("C")</p>
+<p>Total amount: @_totalAmount.ToString("C")</p>
 <table class="table">
     <thead> <tr>
         <th>Category</th>
@@ -23,8 +23,28 @@
     </tbody>
 </table>
 
+<div class="btn-group mb-3" role="group">
+    <button type="button" 
+            class="btn @(_selectedTimeRange == TimeRange.Week ? "btn-primary" : "btn-outline-primary")"
+            @onclick="() => ChangeTimeRange(TimeRange.Week)">
+        Last Week
+    </button>
+
+    <button type="button" 
+            class="btn @(_selectedTimeRange == TimeRange.Month ? "btn-primary" : "btn-outline-primary")"
+            @onclick="() => ChangeTimeRange(TimeRange.Month)">
+        Last Month
+    </button>
+
+    <button type="button" 
+            class="btn @(_selectedTimeRange == TimeRange.Year ? "btn-primary" : "btn-outline-primary")"
+            @onclick="() => ChangeTimeRange(TimeRange.Year)">
+        Last Year
+    </button>
+</div>
+
 <div style="width: 40%; height: 40%">
-    <ApexChart TItem="GraphData"
+    <ApexChart @ref="_chart" TItem="GraphData"
                Title="Expenses graph" Options=options>
 
         <ApexPointSeries TItem="GraphData"
@@ -45,13 +65,15 @@
     [Inject] public IApexChartService ApexChartService { get; set; } = default!;
 
     private readonly DateTime _currentDateTime = DateTime.Now;
-    private double _totalOfCurrentMonth;
+    private double _totalAmount;
     private Dictionary<string, double> _totalOfCategories = new();
+    private TimeRange _selectedTimeRange = TimeRange.Month;
 
     private List<GraphData> _totalOfCategoriesList = new();
     
     // Apexcharts graph necessities
     private ApexChartOptions<GraphData> options { get; set; } = new();
+    private ApexChart<GraphData> _chart;
 
     protected override async Task OnInitializedAsync() {
         try {
@@ -63,26 +85,57 @@
                 Formatter = @"function(value, { seriesIndex, w }) {
             return w.config.series[seriesIndex];}"
             };
-            
+
+            await LoadDataAsync();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error in initializing homepage: {ex.Message}");
+        }
+    }
+
+    public async Task LoadDataAsync() {
+        try {
             var user = UserState.CurrentUser;
             if (user == null) {
                 NavigationManager.NavigateTo("/login");
                 return;
             }
-            
-            _totalOfCurrentMonth = await StatisticsService
-                .GetTotalByMonthAsync(_currentDateTime.Month, _currentDateTime.Year, user.Id);
-            _totalOfCategories = await StatisticsService
-                .GetCategoryTotalsAsync(_currentDateTime.Month, _currentDateTime.Year, user.Id);
 
+            DateTime startDate = DateTime.Now.AddMonths(-1);
+            switch (_selectedTimeRange) {
+                case TimeRange.Year:
+                    startDate = DateTime.Now.AddYears(-1);
+                    break;
+                case TimeRange.Month:
+                    startDate = DateTime.Now.AddMonths(-1);
+                    break;
+                case TimeRange.Week:
+                    startDate = DateTime.Now.AddDays(-7);
+                    break;
+            }
+            
+            _totalOfCategories = await StatisticsService
+                .GetCategoryTotalsByDateAsync(startDate, user.Id);
+
+            _totalAmount = _totalOfCategories.Values.Sum();
+            
             _totalOfCategoriesList.Clear(); // Just in case
             foreach (var category in _totalOfCategories) {
                 var graphData = new GraphData(category.Key, category.Value);
                 _totalOfCategoriesList.Add(graphData);
             }
+            
+            if (_chart != null) {
+                await _chart.UpdateSeriesAsync(true);
+            }
         }
         catch (Exception ex) {
-            Console.WriteLine($"Error in initializing Home page: {ex.Message}");
+            Console.WriteLine($"Error in loading data on homepage: {ex.Message}");
         }
+    }
+
+    public async Task ChangeTimeRange(TimeRange timeRange) {
+        _selectedTimeRange = timeRange;
+        await LoadDataAsync();
     }
 }
