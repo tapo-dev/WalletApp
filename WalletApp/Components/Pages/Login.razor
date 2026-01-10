@@ -1,5 +1,7 @@
 @page "/login"
 @using WalletApp.Services
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
 
 <form @onsubmit="SubmitLogin">
     <p>Username:</p>
@@ -14,6 +16,7 @@
     [Inject] IUserService UserService { get; set; } = default!;
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
     [Inject] UserState UserState { get; set; } = default!;
+    [Inject] ProtectedLocalStorage ProtectedLocalStore { get; set; } = default!;
 
     private string _username = string.Empty;
     private string _password = string.Empty;
@@ -31,6 +34,9 @@
                 _errorMessage = "Wrong name or password";
                 return;
             }
+            
+            // For saving users login in order to not needing to log in everytime
+            await ProtectedLocalStore.SetAsync("userId", user.Id);
 
             _username = string.Empty;
             _password = string.Empty;

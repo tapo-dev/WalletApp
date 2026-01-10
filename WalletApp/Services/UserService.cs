@@ -82,4 +82,19 @@ public class UserService : IUserService {
             throw;
         }
     }
+
+    public async Task<User?> GetUserByIdAsync(int userId) {
+        try {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null) {
+                return user;
+            }
+
+            return null;
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"An errored has occured during getting user by id: {ex.Message}");
+            return null;
+        }
+    }
 }
