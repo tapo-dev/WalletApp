@@ -9,6 +9,7 @@
             <th>Amount</th>
             <th>Subcategory</th>
             <th>Date added</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -18,6 +19,11 @@
                     <td>@expense.Amount</td>
                     <td>@expense.Subcategory.Name</td>
                     <td>@expense.DateAdded</td>
+                    <td>
+                        <button class="btn btn-outline-secondary btn-sm me-2">✏️</button>
+
+                        <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDelete(expense.Id)">🗑️</button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -48,6 +54,22 @@ else {
         }
         catch (Exception ex) {
             Console.WriteLine($"Error in initializing ExpenseHistory page: {ex.Message}");
+        }
+    }
+
+    private async Task ConfirmDelete(int expenseId) {
+        try {
+            var user = UserState.CurrentUser;
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+            
+            await ExpenseService.DeleteExpenseAsync(expenseId);
+            _expenses = await ExpenseService.GetAllExpensesAsync(user.Id);
+        }
+        catch (Exception ex){
+            Console.WriteLine($"Error in removing expense: {ex.Message}");
         }
     }
 }

@@ -35,4 +35,21 @@ public class ExpenseService : IExpenseService {
             throw;
         }
     }
+
+    public async Task DeleteExpenseAsync(int expenseId) {
+        try {
+            var expense = await _context.Expenses.FindAsync(expenseId);
+            if (expense != null) {
+                _context.Expenses.Remove(expense);
+                await _context.SaveChangesAsync();
+            }
+            else {
+                throw new MissingMemberException();
+            }
+        }
+        catch (Exception ex){
+            Console.WriteLine($"An error has occured during deleting an expense: {ex.Message}");
+            throw;
+        }
+    }
 }
