@@ -52,4 +52,25 @@ public class ExpenseService : IExpenseService {
             throw;
         }
     }
+
+    public async Task<Expense?> GetExpenseByIdAsync(int id) {
+        try {
+            var expense = await _context.Expenses.FindAsync(id);
+            return expense;
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"An error has occured during getting an expense by id: {ex.Message}");
+            return null;
+        }
+    }
+    public async Task UpdateExpenseAsync(Expense expense) {
+        try {
+            _context.Expenses.Update(expense);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Error updating expense: {ex.Message}");
+            throw;
+        }
+    }
 }

@@ -1,0 +1,50 @@
+@page "/edit-expense/{expenseId:int}"
+@using WalletApp.Models
+@using WalletApp.Services
+@if (Expense != null) {
+    <h3>Edit expense</h3>
+    <EditForm Model="Expense" OnValidSubmit="HandleValidSubmit">
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <InputText @bind-Value="Expense.Name" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Amount</label>
+            <InputNumber @bind-Value="Expense.Amount" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Date added</label>
+            <InputDate @bind-Value="Expense.DateAdded" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Confirm</button>
+    </EditForm>
+}
+else {
+    <p>Loading...</p>
+}
+
+@code {
+    [Parameter] public int expenseId { get; set; }
+    [Inject] IExpenseService ExpenseService { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+    
+    public Expense? Expense { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        await base.OnInitializedAsync();
+        Expense = await ExpenseService.GetExpenseByIdAsync(expenseId);
+    }
+
+    private async Task HandleValidSubmit() {
+        try {
+            if (Expense != null) {
+                await ExpenseService.UpdateExpenseAsync(Expense);
+            }
+
+            NavigationManager.NavigateTo("/history");
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"An error has occured during submitting updated expense: {ex.Message}");
+        }
+    }
+}
