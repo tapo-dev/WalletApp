@@ -1,6 +1,8 @@
 @page "/edit-expense/{expenseId:int}"
 @using WalletApp.Models
 @using WalletApp.Services
+
+<PageTitle>Home</PageTitle>
 @if (Expense != null) {
     <h3>Edit expense</h3>
     <EditForm Model="Expense" OnValidSubmit="HandleValidSubmit">
