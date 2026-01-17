@@ -33,7 +33,7 @@
         <!-- Pie graph -->
         <div style="width: 80%">
             <ApexChart @ref="_chart" TItem="GraphData" OnDataPointSelection="HandleChartClick"
-                       Title="Expenses graph" Options=options>
+                       Title="Pie chart" Options=options>
 
                 <ApexPointSeries TItem="GraphData"
                                  Items="_totalOfCategoriesList"
@@ -46,6 +46,7 @@
             </ApexChart>
         </div>
         
+        <h3>Recent transactions</h3>
         <table class="table">
             <thead>
             <tr>
@@ -69,6 +70,7 @@
     </div>
 
     <div class="col-md-6">
+        <h3>Listed values for the pie chart</h3>
         <table class="table">
             <thead>
             <tr>
