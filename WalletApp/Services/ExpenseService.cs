@@ -15,7 +15,8 @@ public class ExpenseService : IExpenseService {
         try {
             var expenses = await _context.Expenses
                 .Where(e => e.UserId == userId)
-                .Include(expense => expense.Subcategory)
+                .Include(e => e.Subcategory)
+                .ThenInclude(s => s.Category)
                 .ToListAsync();
             return expenses;
         }

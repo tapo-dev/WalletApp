@@ -1,75 +1,113 @@
 ﻿@page "/"
 @using WalletApp.Services
-@using __Blazor.ApexCharts
 @using ApexCharts
 @using WalletApp.Models
 @using WalletApp.Models.DTOs
 
 <PageTitle>Home</PageTitle>
 <p>Total amount: @_totalAmount.ToString("C")</p>
-<table class="table">
-    <thead> <tr>
-        <th>Category</th>
-        <th>Amount</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var category in _totalOfCategories) {
-        <tr>
-            <td>@category.Key</td>
-            <td>@category.Value.ToString("C")</td>
-        </tr>
-    }
-    </tbody>
-</table>
 
-<div class="btn-group mb-3" role="group">
-    <button type="button" 
-            class="btn @(_selectedTimeRange == TimeRange.Week ? "btn-primary" : "btn-outline-primary")"
-            @onclick="() => ChangeTimeRange(TimeRange.Week)">
-        Last Week
-    </button>
+<div class="row">
+    <div class="col-md-6">
+        <!-- Buttons for last Last week/Last month/Last year's -->
+        <div class="btn-group mb-3" role="group">
+            <button type="button" 
+                    class="btn @(_selectedTimeRange == TimeRange.Week ? "btn-primary" : "btn-outline-primary")"
+                    @onclick="() => ChangeTimeRange(TimeRange.Week)">
+                Last Week
+            </button>
 
-    <button type="button" 
-            class="btn @(_selectedTimeRange == TimeRange.Month ? "btn-primary" : "btn-outline-primary")"
-            @onclick="() => ChangeTimeRange(TimeRange.Month)">
-        Last Month
-    </button>
+            <button type="button" 
+                    class="btn @(_selectedTimeRange == TimeRange.Month ? "btn-primary" : "btn-outline-primary")"
+                    @onclick="() => ChangeTimeRange(TimeRange.Month)">
+                Last Month
+            </button>
 
-    <button type="button" 
-            class="btn @(_selectedTimeRange == TimeRange.Year ? "btn-primary" : "btn-outline-primary")"
-            @onclick="() => ChangeTimeRange(TimeRange.Year)">
-        Last Year
-    </button>
-</div>
+            <button type="button" 
+                    class="btn @(_selectedTimeRange == TimeRange.Year ? "btn-primary" : "btn-outline-primary")"
+                    @onclick="() => ChangeTimeRange(TimeRange.Year)">
+                Last Year
+            </button>
+        </div>
 
-<div style="width: 40%; height: 40%">
-    <ApexChart @ref="_chart" TItem="GraphData"
-               Title="Expenses graph" Options=options>
+        <!-- Pie graph -->
+        <div style="width: 80%">
+            <ApexChart @ref="_chart" TItem="GraphData" OnDataPointSelection="HandleChartClick"
+                       Title="Expenses graph" Options=options>
 
-        <ApexPointSeries TItem="GraphData"
-                         Items="_totalOfCategoriesList"
-                         Name="Gross Value"
-                         SeriesType="SeriesType.Pie"
-                         XValue="@(c => c.Name)"
-                         YAggregate="@(c => c.Sum(c => (decimal) c.Amount))"
-                         OrderByDescending="e=>e.Y"
-                         ShowDataLabels />
-    </ApexChart>
+                <ApexPointSeries TItem="GraphData"
+                                 Items="_totalOfCategoriesList"
+                                 Name="Gross Value"
+                                 SeriesType="SeriesType.Pie"
+                                 XValue="@(c => c.Name)"
+                                 YAggregate="@(c => c.Sum(c => (decimal) c.Amount))"
+                                 OrderByDescending="e=>e.Y"
+                                 ShowDataLabels />
+            </ApexChart>
+        </div>
+        
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var expense in _expenses
+                          .Where(e => _currentCategorySelected == string.Empty || e.Subcategory.Category.Name == _currentCategorySelected)
+                          .Take(5)) {
+                <tr>
+                    <td>@expense.Subcategory.Category.Name</td>
+                    <td>@expense.Amount.ToString("C")</td>
+                    <td>@expense.DateAdded.ToShortDateString()</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Category</th>
+                <th>Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var category in _totalOfCategories) {
+                <tr>
+                    <td>@category.Key</td>
+                    <td>@category.Value.ToString("C")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @code {
+    // Dependency injections
     [Inject] IStatisticsService StatisticsService { get; set; } = default!;
     [Inject] UserState UserState { get; set; } = default!;
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
-    [Inject] public IApexChartService ApexChartService { get; set; } = default!;
-
-    private readonly DateTime _currentDateTime = DateTime.Now;
+    [Inject] IApexChartService ApexChartService { get; set; } = default!;
+    [Inject] IExpenseService ExpenseService { get; set; } = default!;
+    
+    // Total amount of all expenses
     private double _totalAmount;
+    // For current selected category when you click on the graph
+    private string _currentCategorySelected = string.Empty; //
+    // Total amount for every category <Category, amount>
     private Dictionary<string, double> _totalOfCategories = new();
+    // TimeRange for selecting Last week/Last month/Last year's expenses to show in graph
     private TimeRange _selectedTimeRange = TimeRange.Month;
-
+    // Same as _totalOfCategories, but made for ApexCharts as a List with DTO GraphData
     private List<GraphData> _totalOfCategoriesList = new();
+    // List of all expenses
+    private List<Expense> _expenses = new();
     
     // Apexcharts graph necessities
     private ApexChartOptions<GraphData> options { get; set; } = new();
@@ -85,6 +123,16 @@
                 Formatter = @"function(value, { seriesIndex, w }) {
             return w.config.series[seriesIndex];}"
             };
+            
+            var user = UserState.CurrentUser;
+            if (user == null) {
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            // To sort the list from latest expenses
+            var rawExpenses = await ExpenseService.GetAllExpensesAsync(user.Id);
+            _expenses = rawExpenses.OrderByDescending(e => e.DateAdded).ToList();
 
             await LoadDataAsync();
         }
@@ -93,7 +141,7 @@
         }
     }
 
-    public async Task LoadDataAsync() {
+    private async Task LoadDataAsync() {
         try {
             var user = UserState.CurrentUser;
             if (user == null) {
@@ -134,8 +182,17 @@
         }
     }
 
-    public async Task ChangeTimeRange(TimeRange timeRange) {
+    private async Task ChangeTimeRange(TimeRange timeRange) {
         _selectedTimeRange = timeRange;
         await LoadDataAsync();
+    }
+
+    private void HandleChartClick(SelectedData<GraphData> data) {
+        if (_currentCategorySelected == (string) data.DataPoint.X) {
+            _currentCategorySelected = string.Empty;
+        }
+        else {
+            _currentCategorySelected = (string) data.DataPoint.X;
+        }
     }
 }

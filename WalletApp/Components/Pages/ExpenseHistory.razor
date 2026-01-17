@@ -9,6 +9,7 @@
         <thead> <tr>
             <th>Name</th>
             <th>Amount</th>
+            <th>Category</th>
             <th>Subcategory</th>
             <th>Date added</th>
             <th></th>
@@ -19,6 +20,7 @@
                 <tr>
                     <td>@expense.Name</td>
                     <td>@expense.Amount</td>
+                    <td>@expense.Subcategory.Category.Name</td>
                     <td>@expense.Subcategory.Name</td>
                     <td>@expense.DateAdded.ToShortDateString()</td>
                     <td>
