@@ -28,16 +28,18 @@
 </form>
 
 @code {
+    // Dependency injection
     [Inject] ICategoryService CategoryService { get; set; } = default!;
     [Inject] IExpenseService ExpenseService { get; set; } = default!;
     [Inject] UserState UserState { get; set; } = default!;
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
-    private List<Subcategory> _subcategories = new List<Subcategory>();
-    private List<Category> _allCategories = new List<Category>();
+    private List<Category> _allCategories = new();
+    // List of all subcategories from selected category
+    private List<Subcategory> _subcategories = new();
 
-    private Category _category = new Category();
-    private Expense _newExpense = new Expense();
+    private Category _category = new();
+    private Expense _newExpense = new();
 
     private string _errorMessage = string.Empty;
 
