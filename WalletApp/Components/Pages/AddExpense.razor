@@ -2,51 +2,87 @@
 @using WalletApp.Models
 @using WalletApp.Services
 
-<PageTitle>Add expense</PageTitle>
-<h3>Add Expense</h3>
-<form @onsubmit="SubmitNewExpense">
-    <p>Category</p>
-    <select @bind="_category.Id" @bind:after="OnCategorySelectedAsync">
-        <option value="0">Choose category...</option>
-        @foreach (var category in _allCategories) {
-            <option value="@category.Id">@category.Name</option>
-        }
-    </select>
-    <p>Subcategory</p>
-    <select @bind="_newExpense.SubcategoryId">
-        <option value="0">Choose subcategory...</option>
-        @foreach (var sub in _subcategories) {
-            <option value="@sub.Id">@sub.Name</option>
-        }
-    </select>
-    <p>Name (optional)</p>
-    <input type="text" @bind="_newExpense.Name"/>
-    <p>Amount</p>
-    <input type="number" step="0.01" @bind="_newExpense.Amount"/>
-    <button type="submit">Add expense</button>
-    <p>@_errorMessage</p>
-</form>
+<PageTitle>Add Expense</PageTitle>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-wallet2 me-2"></i>Add New Expense</h4>
+            </div>
+            <div class="card-body">
+                <form @onsubmit="SubmitNewExpense">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Category</label>
+                        <select class="form-select" @bind="_category.Id" @bind:after="OnCategorySelectedAsync">
+                            <option value="0">Choose category...</option>
+                            @foreach (var category in _allCategories) {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Subcategory</label>
+                        <select class="form-select" @bind="_newExpense.SubcategoryId" disabled="@(!_subcategories.Any())">
+                            <option value="0">
+                                @(_subcategories.Any() ? "Choose subcategory..." : "Select a category first...")
+                            </option>
+                            @foreach (var sub in _subcategories) {
+                                <option value="@sub.Id">@sub.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description <span class="text-muted fw-normal">(optional)</span></label>
+                        <input type="text" class="form-control" @bind="_newExpense.Name" placeholder="e.g. Lunch, Taxi, Groceries..."/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Amount</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" class="form-control" @bind="_newExpense.Amount" placeholder="0.00"/>
+                            <span class="input-group-text">CZK</span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>@_errorMessage</div>
+                        </div>
+                    }
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle me-2"></i>Add Expense
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
-    // Dependency injection
     [Inject] ICategoryService CategoryService { get; set; } = default!;
     [Inject] IExpenseService ExpenseService { get; set; } = default!;
     [Inject] UserState UserState { get; set; } = default!;
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
-    private List<Category> _allCategories = new();
-    // List of all subcategories from selected category
-    private List<Subcategory> _subcategories = new();
+    private List<Subcategory> _subcategories = new List<Subcategory>();
+    private List<Category> _allCategories = new List<Category>();
 
-    private Category _category = new();
-    private Expense _newExpense = new();
-
+    private Category _category = new Category();
+    private Expense _newExpense = new Expense();
     private string _errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync() {
         try {
             await base.OnInitializedAsync();
-            
             var user = UserState.CurrentUser;
             if (user == null) {
                 NavigationManager.NavigateTo("/login");
@@ -62,7 +98,7 @@
 
     private async Task SubmitNewExpense() {
         if (_newExpense.SubcategoryId == 0 || _newExpense.Amount <= 0) {
-            _errorMessage = "Empty input field";
+            _errorMessage = "Please select a subcategory and enter a valid amount.";
             return;
         }
 
@@ -79,9 +115,11 @@
 
             // Adds new expense
             await ExpenseService.AddExpenseAsync(_newExpense);
-
-            // Submitted succesfully -> clean
-            _newExpense = new Expense();
+            
+            // Navigate back to home or show success? 
+            // For now, let's clear the form and maybe show a success message or go Home.
+            // Let's go to Home to see the graph update!
+            NavigationManager.NavigateTo("/");
         }
         catch (Exception ex) {
             _errorMessage = "An error has occured during creating your expense";

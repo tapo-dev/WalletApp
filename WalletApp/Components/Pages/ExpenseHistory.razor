@@ -24,9 +24,13 @@
                     <td>@expense.Subcategory.Name</td>
                     <td>@expense.DateAdded.ToShortDateString()</td>
                     <td>
-                        <button class="btn btn-outline-secondary btn-sm me-2" @onclick='() => NavigationManager.NavigateTo($"edit-expense/{expense.Id}")'>✏️</button>
+                        <button class="btn btn-outline-secondary btn-sm me-2" @onclick='() => NavigationManager.NavigateTo($"edit-expense/{expense.Id}")'>
+                            <i class="bi bi-pencil"></i>
+                        </button>
 
-                        <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDelete(expense.Id)">🗑️</button>
+                        <button class="btn btn-outline-danger btn-sm" @onclick="() => ConfirmDelete(expense.Id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             }
