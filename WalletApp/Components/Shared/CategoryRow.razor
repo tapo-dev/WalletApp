@@ -1,34 +1,64 @@
 @using WalletApp.Models
 @using WalletApp.Services
 
-<li @onclick="ToggleSubcategories" style="cursor: pointer;"> 
-    @CategoryData.Name
-</li>
-@if (_isExpanded) {
-    if (CategoryData.Subcategories.Any()) {
-        <ul>@foreach (var subcategory in CategoryData.Subcategories) {
-                <li>
-                    @subcategory.Name
-                </li>
-                <button class="btn btn-danger btn-sm" @onclick="() => RemoveSubcategory(subcategory)">Remove</button>
+<div class="card mb-3 shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center" 
+         @onclick="ToggleSubcategories" 
+         style="cursor: pointer; background-color: @CategoryData.Color; color: white;">
+        
+        <span class="fw-bold">@CategoryData.Name</span>
+        <i class="bi @(_isExpanded ? "bi-chevron-up" : "bi-chevron-down")"></i>
+    </div>
+
+    @if (_isExpanded)
+    {
+        <div class="card-body">
+            @if (CategoryData.Subcategories.Any())
+            {
+                <ul class="list-group list-group-flush mb-3">
+                    @foreach (var subcategory in CategoryData.Subcategories)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@subcategory.Name</span>
+                            <button class="btn btn-outline-danger btn-sm" 
+                                    @onclick="() => RemoveSubcategory(subcategory)" 
+                                    title="Remove subcategory">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </li>
+                    }
+                </ul>
             }
-        </ul>
+            else
+            {
+                <p class="text-muted fst-italic ms-2">No subcategories found.</p>
+            }
+
+            <form @onsubmit="SubmitNewSubcategory" class="d-flex gap-2 mt-2">
+                <input type="text" class="form-control form-control-sm" 
+                       placeholder="New subcategory..." 
+                       @bind="_newSubcategoryName"/>
+                <button type="submit" class="btn btn-secondary btn-sm">
+                    <i class="bi bi-plus-lg"></i> Add
+                </button>
+            </form>
+            
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="text-danger small mt-1">@_errorMessage</div>
+            }
+        </div>
     }
-    <form @onsubmit="SubmitNewSubcategory">
-        <input type="text" @bind="_newSubcategoryName"/>
-        <button type="submit">Add new subcategory</button>
-        <p>@_errorMessage</p>
-    </form>
-}
+</div>
 
 @code {
     [Parameter] public Category CategoryData { get; set; } = default!;
+    
     [Inject] ICategoryService CategoryService { get; set; } = default!;
     [Inject] UserState UserState { get; set; } = default!;
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
     
-    private List<Subcategory> _subcategoriesList = [];
-
+    // UI state
     private bool _isExpanded = false;
     private string _newSubcategoryName = string.Empty;
     private string _errorMessage = string.Empty;
@@ -51,15 +81,24 @@
             }
             
             _errorMessage = string.Empty;
-
             var newSubcategory = new Subcategory() 
                 { Name = _newSubcategoryName, CategoryId = CategoryData.Id, UserId = user.Id };
+            
             await CategoryService.AddSubCategoryAsync(newSubcategory);
 
+            // Clear input
             _newSubcategoryName = string.Empty;
+            
+            // Refresh data to show the new subcategory immediately
+            var updatedCategories = await CategoryService.GetCategoriesAsync(user.Id);
+            var updatedMe = updatedCategories.FirstOrDefault(c => c.Id == CategoryData.Id);
+            if(updatedMe != null)
+            {
+                CategoryData.Subcategories = updatedMe.Subcategories;
+            }
         }
         catch (Exception ex) {
-            _errorMessage = "An error has occured during creating your subcategory";
+            _errorMessage = "Error creating subcategory";
             Console.WriteLine($"Error in saving subcategory: {ex.Message}");
         }
     }
@@ -68,14 +107,20 @@
         try {
             await CategoryService.RemoveSubcategoryAsync(subcategory);
             
+             // Refresh data after deletion
             var user = UserState.CurrentUser;
             if (user != null) {
-                _subcategoriesList = await CategoryService.GetSubcategoriesFromCategoryAsync(subcategory.CategoryId, user.Id);
+                var updatedCategories = await CategoryService.GetCategoriesAsync(user.Id);
+                var updatedMe = updatedCategories.FirstOrDefault(c => c.Id == CategoryData.Id);
+                if(updatedMe != null)
+                {
+                    CategoryData.Subcategories = updatedMe.Subcategories;
+                }
             }
         }
         catch (Exception ex) {
-            Console.WriteLine($"An error has occured during removing a subcategory: {ex.Message}");
-            _errorMessage = "An error has occured during removing a subcategory";
+            Console.WriteLine($"Error removing subcategory: {ex.Message}");
+            _errorMessage = "Error removing subcategory";
         }
     }
 }

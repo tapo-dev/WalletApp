@@ -4,26 +4,49 @@
 @using WalletApp.Components.Shared
 
 <PageTitle>Categories</PageTitle>
-<form @onsubmit="SubmitNewCategory">
-    <input type="text" @bind="_newCategory"/>
-    <button type="submit">Add</button>
-    <p>@_errorMessage</p>
-</form>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <form @onsubmit="SubmitNewCategory" class="d-flex gap-2">
+            <input type="text" class="form-control" placeholder="New category name..." @bind="_newCategory"/>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Add Category
+            </button>
+        </form>
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert alert-danger mt-2">@_errorMessage</div>
+        }
+    </div>
+</div>
 
 @if (_categoriesList.Any()) {
-    @foreach(var category in _categoriesList)
-    {
-        // Prints out all the categories
-        <CategoryRow CategoryData="@category"/>
-        
-        <button class="btn btn-danger btn-sm" @onclick="() => RemoveCategory(category)">Remove</button>
-    }
+    <div class="row">
+        <div class="col-md-8">
+            @foreach(var category in _categoriesList)
+            {
+                <div class="mb-4">
+                    <CategoryRow CategoryData="@category"/>
+                    
+                    <div class="text-end">
+                        <button class="btn btn-link text-danger text-decoration-none btn-sm" 
+                                @onclick="() => RemoveCategory(category)"
+                                title="Delete entire category">
+                            <i class="bi bi-trash"></i> Delete Category "@category.Name"
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <p class="text-muted">No categories found. Start by adding one above.</p>
 }
 
-
 @code {
-
-    // Dependency injection
+    // Dependency Injection
     [Inject] ICategoryService CategoryService { get; set; } = default!;
     [Inject] UserState UserState { get; set; } = default!;
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
@@ -32,13 +55,13 @@
 
     private string _newCategory = string.Empty;
     private string _errorMessage = string.Empty;
-    private Category _categoryToRemove;
-    private const string DefaultColor = "#8A8A8A";
+    
+    // Default color for new categories (Bootstrap Primary Blue)
+    private const string DefaultColor = "#0d6efd";
 
     protected override async Task OnInitializedAsync() {
         try {
             await base.OnInitializedAsync();
-
             var user = UserState.CurrentUser;
             if (user == null) {
                 NavigationManager.NavigateTo("/login");
@@ -48,14 +71,14 @@
             _categoriesList = await CategoryService.GetCategoriesAsync(user.Id);
         }
         catch (Exception ex) {
-            Console.WriteLine($"Error in initializing Categories page: {ex.Message}");
+            Console.WriteLine($"Error initializing Categories page: {ex.Message}");
         }
     }
 
     private async Task SubmitNewCategory() {
         // Validation
         if (string.IsNullOrEmpty(_newCategory)) {
-            _errorMessage = "Empty input field";
+            _errorMessage = "Input cannot be empty";
             return;
         }
 
@@ -63,7 +86,7 @@
             _errorMessage = string.Empty;
             var user = UserState.CurrentUser;
             
-            // If session expires
+            // Session check
             if (user == null) {
                 NavigationManager.NavigateTo("/login");
                 return;
@@ -72,28 +95,28 @@
             var newCategory = new Category() { Name = _newCategory, Color = DefaultColor, UserId = user.Id};
             await CategoryService.AddCategoryAsync(newCategory);
 
-            // Submitted without error -> clean and refresh
+            // Success: Clean input and refresh list
             _newCategory = string.Empty;
             _categoriesList = await CategoryService.GetCategoriesAsync(user.Id);
         }
         catch (Exception ex) {
-            _errorMessage = "An error has occured during creating your category";
-            Console.WriteLine($"Error in saving category: {ex.Message}");
+            _errorMessage = "An error occurred while creating the category";
+            Console.WriteLine($"Error saving category: {ex.Message}");
         }
     }
 
     private async Task RemoveCategory(Category category) {
         try {
             await CategoryService.RemoveCategoryAsync(category);
-
+            
             var user = UserState.CurrentUser;
             if (user != null) {
                 _categoriesList = await CategoryService.GetCategoriesAsync(user.Id);
             }
         }
         catch (Exception ex) {
-            Console.WriteLine($"An error has occured during removing a category: {ex.Message}");
-            _errorMessage = "An error has occured during removing a category";
+            Console.WriteLine($"Error removing category: {ex.Message}");
+            _errorMessage = "An error occurred while removing the category";
         }
     }
 }
