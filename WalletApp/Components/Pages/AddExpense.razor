@@ -22,7 +22,7 @@
     <p>Name (optional)</p>
     <input type="text" @bind="_newExpense.Name"/>
     <p>Amount</p>
-    <input type="number" @bind="_newExpense.Amount"/>
+    <input type="number" step="0.01" @bind="_newExpense.Amount"/>
     <button type="submit">Add expense</button>
     <p>@_errorMessage</p>
 </form>
