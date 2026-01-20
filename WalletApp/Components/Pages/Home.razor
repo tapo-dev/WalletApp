@@ -50,7 +50,7 @@
         <table class="table">
             <thead>
             <tr>
-                <th>Category</th>
+                <th>Subcategory</th>
                 <th>Amount</th>
                 <th>Date</th>
             </tr>
@@ -60,7 +60,7 @@
                           .Where(e => _currentCategorySelected == string.Empty || e.Subcategory.Category.Name == _currentCategorySelected)
                           .Take(5)) {
                 <tr>
-                    <td>@expense.Subcategory.Category.Name</td>
+                    <td>@expense.Subcategory.Name</td>
                     <td>@expense.Amount.ToString("C")</td>
                     <td>@expense.DateAdded.ToShortDateString()</td>
                 </tr>
